@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_ablum">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.xter.pickit.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_ablum"
+        android:name="com.xter.pickit.ui.album.PhotoAlbumFragment"
+        android:label="@string/menu_dir"
+        tools:layout="@layout/photo_album_fragment" />
 
     <fragment
-        android:id="@+id/nav_gallery"
+        android:id="@+id/nav_group"
         android:name="com.xter.pickit.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
+        android:label="@string/menu_group"
         tools:layout="@layout/fragment_gallery" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
+        android:id="@+id/nav_settings"
         android:name="com.xter.pickit.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
+        android:label="@string/action_settings"
         tools:layout="@layout/fragment_slideshow" />
 </navigation>
