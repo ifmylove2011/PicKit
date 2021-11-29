@@ -32,4 +32,7 @@
     <string name="action_grid_rows_sub">减少一列</string>
 
     <string name="action_grid_style">网格样式</string>
+    <string name="img_desc_cover">封面</string>
+    <string name="text_count_default">0</string>
+    <string name="text_default_folder">pic</string>
 </resources>
