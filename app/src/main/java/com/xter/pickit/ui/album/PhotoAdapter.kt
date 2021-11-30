@@ -1,13 +1,17 @@
 package com.xter.pickit.ui.album
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+import com.xter.pickit.R
 import com.xter.pickit.databinding.ItemFolerCoverBinding
 import com.xter.pickit.entity.LocalMediaFolder
+import com.xter.pickit.kit.GlideApp
+import com.xter.pickit.kit.L
 
 /**
  * @Author XTER
@@ -16,23 +20,31 @@ import com.xter.pickit.entity.LocalMediaFolder
  */
 class PhotoAdapter(private val VM: PhotoAlbumViewModel) :
     ListAdapter<LocalMediaFolder, ViewHolderK>(FolderDiffCallback()) {
+
     private lateinit var onItemClickListener: OnItemClickListener
+
+    private var mStyle = ItemStyle.DEFAULT
 
     fun setItemClickListener(listener: OnItemClickListener) {
         onItemClickListener = listener
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderK {
-        return ViewHolderK.from(parent)
+    fun setItemStyle(style: ItemStyle) {
+        mStyle = style
+        L.d("style=${style.toString()}")
+        notifyDataSetChanged()
     }
 
-
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderK {
+        L.d("onCreateViewHolder")
+        return ViewHolderK.from(parent)
+    }
 
     override fun onBindViewHolder(holder: ViewHolderK, position: Int) {
         holder.apply {
             val folder = getItem(position)
-            bind(VM,folder)
-            itemView.let { view->
+            bind(VM, folder)
+            itemView.let { view ->
                 view.setOnClickListener {
                     onItemClickListener.onItemClick(holder, holder.adapterPosition)
                 }
@@ -40,6 +52,31 @@ class PhotoAdapter(private val VM: PhotoAlbumViewModel) :
                     onItemClickListener.onItemLongClick(holder, holder.adapterPosition)
                     true
                 }
+            }
+
+            if (mStyle == ItemStyle.GRID) {
+                holder.binding.gicFolderCover.visibility = View.VISIBLE
+                holder.binding.ivFolderCover.visibility = View.GONE
+                val images = holder.binding.gicFolderCover.getImageViews()
+                for (iv in images) {
+                    GlideApp.with(itemView)
+                        .load(folder.firstImagePath)
+                        .transition(withCrossFade())
+                        .centerCrop()
+                        .placeholder(R.drawable.image_placeholder)
+                        .error(R.mipmap.ic_error)
+                        .into(iv)
+                }
+            } else if (mStyle == ItemStyle.DEFAULT) {
+                holder.binding.gicFolderCover.visibility = View.GONE
+                holder.binding.ivFolderCover.visibility = View.VISIBLE
+                GlideApp.with(itemView)
+                    .load(folder.firstImagePath)
+                    .transition(withCrossFade())
+                    .centerCrop()
+                    .placeholder(R.drawable.image_placeholder)
+                    .error(R.mipmap.ic_error)
+                    .into(holder.binding.ivFolderCover)
             }
         }
     }
@@ -80,6 +117,13 @@ class FolderDiffCallback : DiffUtil.ItemCallback<LocalMediaFolder>() {
     override fun areContentsTheSame(oldItem: LocalMediaFolder, newItem: LocalMediaFolder): Boolean {
         return oldItem.equals(newItem)
     }
+}
+
+enum class ItemStyle {
+    DEFAULT,
+    GRID,
+    STACK,
+    LIST
 }
 
 //@BindingAdapter("items")

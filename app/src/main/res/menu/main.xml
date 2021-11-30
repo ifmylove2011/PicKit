@@ -26,7 +26,9 @@
         android:title="@string/action_layout"
         app:showAsAction="never" >
         <menu>
+            <item android:title="@string/action_layout_default" android:id="@+id/action_layout_default"/>
             <item android:title="@string/action_layout_grid" android:id="@+id/action_layout_grid"/>
+            <item android:title="@string/action_layout_stack" android:id="@+id/action_layout_stack"/>
             <item android:title="@string/action_layout_list" android:id="@+id/action_layout_list"/>
         </menu>
     </item>

@@ -90,7 +90,7 @@ class LocalMediaLoader {
         return getSelectionArgsForImage(mimeCondition, fileSizeCondition)
     }
 
-    fun loadImages(context: Context, listener: IQueryResultListener<LocalMediaFolder>) {
+    fun loadImageFolders(context: Context, listener: IQueryResultListener<LocalMediaFolder>) {
         GlobalScope.launch {
             //TODO 可能不只需要封面，预留
             val selection = getSelection()
@@ -103,7 +103,7 @@ class LocalMediaLoader {
                 if (PlatformUtil.isR()) ORDER_BY else null
             )?.let { cursor ->
                 val count: Int = cursor.getCount()
-                L.i("count=$count")
+                L.i("查询结果数量 count=$count")
                 var totalCount = 0
                 val mediaFolders: MutableList<LocalMediaFolder> = ArrayList<LocalMediaFolder>()
                 if (count > 0) {

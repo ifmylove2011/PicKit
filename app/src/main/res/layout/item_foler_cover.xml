@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="folder"
             type="com.xter.pickit.entity.LocalMediaFolder" />
@@ -13,37 +14,43 @@
             type="com.xter.pickit.ui.album.PhotoAlbumViewModel" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.xter.pickit.ui.widget.SquareRelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="2dp">
 
         <ImageView
             android:id="@+id/iv_folder_cover"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/avatars"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
             android:contentDescription="@string/img_desc_cover" />
+
+        <com.xter.pickit.ui.widget.GridImageContainer
+            android:id="@+id/gic_folder_cover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:column="2"
+            app:padding="1dp"
+            app:row="2" />
 
         <TextView
             android:id="@+id/tv_folder_count"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:text="@{String.valueOf(folder.imageNum)}"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_folder_cover"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:textColor="@color/purple" />
 
         <TextView
             android:id="@+id/tv_folder_name"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@id/tv_folder_count"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="@{folder.name}"
-            app:layout_constraintBottom_toTopOf="@+id/tv_folder_count"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:textColor="@color/purple" />
+    </com.xter.pickit.ui.widget.SquareRelativeLayout>
 </layout>
