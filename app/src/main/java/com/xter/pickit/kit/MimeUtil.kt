@@ -3,6 +3,8 @@ package com.xter.pickit.kit
 import android.content.ContentUris
 import android.net.Uri
 import android.provider.MediaStore
+import android.text.TextUtils
+import java.io.File
 
 /**
  * @Author XTER
@@ -95,5 +97,21 @@ object MimeUtil {
             MediaStore.Files.getContentUri("external")
         }
         return ContentUris.withAppendedId(contentUri, id).toString()
+    }
+
+    fun getImageMimeType(path: String?): String? {
+        try {
+            if (!TextUtils.isEmpty(path)) {
+                val file = File(path)
+                val fileName = file.name
+                val beginIndex = fileName.lastIndexOf(".")
+                val temp = if (beginIndex == -1) "jpeg" else fileName.substring(beginIndex + 1)
+                return "image/$temp"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return MIME_TYPE_IMAGE
+        }
+        return MIME_TYPE_IMAGE
     }
 }

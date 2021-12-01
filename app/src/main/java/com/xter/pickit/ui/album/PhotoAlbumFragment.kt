@@ -3,14 +3,11 @@ package com.xter.pickit.ui.album
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.PhotoAlbumFragmentBinding
 import com.xter.pickit.kit.L
-import com.xter.pickit.ui.home.HomeViewModel
-import pub.devrel.easypermissions.EasyPermissions
 
 
 class PhotoAlbumFragment : Fragment() {
@@ -22,7 +19,7 @@ class PhotoAlbumFragment : Fragment() {
     private lateinit var photoVM: PhotoAlbumViewModel
     private lateinit var photoBinding: PhotoAlbumFragmentBinding
 
-    private lateinit var photoAdapter: PhotoAdapter
+    private lateinit var photoFolderAdapter: PhotoAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,11 +39,13 @@ class PhotoAlbumFragment : Fragment() {
         photoBinding.rvAblum.apply {
             layoutManager = GridLayoutManager(this.context, 2)
             photoBinding.vm?.let { VM ->
-                photoAdapter = PhotoAdapter(VM)
+                photoFolderAdapter = PhotoAdapter(VM)
             }
-            photoAdapter.setItemClickListener(object : OnItemClickListener {
+            photoFolderAdapter.setItemClickListener(object : OnItemClickListener {
                 override fun onItemClick(holderK: ViewHolderK, position: Int) {
-
+                    val folder = holderK.binding.folder
+                    L.d(folder.toString())
+                    photoVM.loadMediaFolder(requireContext(), folder)
                 }
 
                 override fun onItemLongClick(holderK: ViewHolderK, position: Int) {
@@ -54,17 +53,17 @@ class PhotoAlbumFragment : Fragment() {
                 }
 
             })
-            adapter = photoAdapter
+            adapter = photoFolderAdapter
         }
-        photoVM.loaded.observe(viewLifecycleOwner,
+        photoVM.folderLoadCompleted.observe(viewLifecycleOwner,
             {
                 L.i("loaded = $it")
                 if (it) {
-                    photoAdapter.submitList(photoVM.folders.value)
-                    photoAdapter.notifyDataSetChanged()
+                    photoFolderAdapter.submitList(photoVM.folders.value)
+                    photoFolderAdapter.notifyDataSetChanged()
                 }
             })
-        photoVM.loadMediaSource(this.requireContext())
+        photoVM.loadMediaSource(requireContext())
 
     }
 
@@ -75,11 +74,11 @@ class PhotoAlbumFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_layout_grid -> {
-                photoAdapter.setItemStyle(ItemStyle.GRID)
+                photoFolderAdapter.setItemStyle(ItemStyle.GRID)
                 true
             }
             R.id.action_layout_default -> {
-                photoAdapter.setItemStyle(ItemStyle.DEFAULT)
+                photoFolderAdapter.setItemStyle(ItemStyle.DEFAULT)
                 true
             }
             else -> false

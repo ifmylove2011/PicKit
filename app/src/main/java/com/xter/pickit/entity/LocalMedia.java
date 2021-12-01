@@ -279,7 +279,7 @@ public class LocalMedia implements Parcelable {
      */
     public static LocalMedia parseLocalMedia(String path, int position, int chooseModel) {
         LocalMedia localMedia = parseLocalMedia(0, path,
-                "", "", "", 0, chooseModel, "",
+                "", "", "", 0,  "",
                 0, 0, 0, -1, 0);
         localMedia.setPosition(position);
         return localMedia;
@@ -305,7 +305,7 @@ public class LocalMedia implements Parcelable {
      */
     public static LocalMedia parseLocalMedia(long id, String path, String absolutePath,
                                              String fileName, String parentFolderName,
-                                             long duration, int chooseModel, String mimeType,
+                                             long duration, String mimeType,
                                              int width, int height, long size, long bucketId, long dateAdded) {
         LocalMedia localMedia = new LocalMedia();
         localMedia.setId(id);
@@ -314,7 +314,6 @@ public class LocalMedia implements Parcelable {
         localMedia.setFileName(fileName);
         localMedia.setParentFolderName(parentFolderName);
         localMedia.setDuration(duration);
-        localMedia.setChooseModel(chooseModel);
         localMedia.setMimeType(mimeType);
         localMedia.setWidth(width);
         localMedia.setHeight(height);
