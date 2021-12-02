@@ -6,18 +6,20 @@
     <data>
 
         <variable
-            name="VM"
+            name="MediaData"
+            type="com.xter.pickit.entity.LocalMedia" />
+
+        <variable
+            name="photoVM"
             type="com.xter.pickit.ui.album.PhotoAlbumViewModel" />
     </data>
 
-    <FrameLayout
+
+    <ImageView
+        android:id="@+id/iv_image_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
+        android:contentDescription="@string/img_desc_detail"
+        android:visibility="visible" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_ablum"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout>
 </layout>

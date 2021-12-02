@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_multi"
+        android:orderInCategory="100"
+        android:title="@string/action_multi_select"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sort"
+        android:orderInCategory="100"
+        android:title="@string/action_sort"
+        app:showAsAction="never" >
+        <menu>
+            <item android:title="@string/action_sort_name" android:id="@+id/action_sort_name"/>
+            <item android:title="@string/action_sort_path" android:id="@+id/action_sort_path"/>
+            <item android:title="@string/action_sort_time" android:id="@+id/action_sort_time"/>
+            <item android:title="@string/action_sort_size" android:id="@+id/action_sort_size"/>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_layout"
+        android:orderInCategory="100"
+        android:title="@string/action_layout"
+        app:showAsAction="never" >
+        <menu>
+            <item android:title="@string/action_layout_grid" android:id="@+id/action_layout_grid"/>
+            <item android:title="@string/action_layout_list" android:id="@+id/action_layout_list"/>
+        </menu>
+    </item>
+</menu>

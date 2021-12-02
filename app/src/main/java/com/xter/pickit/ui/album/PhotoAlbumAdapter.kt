@@ -18,15 +18,15 @@ import com.xter.pickit.kit.L
  * @Date 2021/11/29 14:57
  * @Description
  */
-class PhotoAdapter(private val VM: PhotoAlbumViewModel) :
-    ListAdapter<LocalMediaFolder, ViewHolderK>(FolderDiffCallback()) {
+class PhotoAlbumAdapter(private val VM: PhotoAlbumViewModel) :
+    ListAdapter<LocalMediaFolder, FolderViewHolder>(FolderDiffCallback()) {
 
-    private lateinit var onItemClickListener: OnItemClickListener
+    private lateinit var onFolderClickListener: OnFolderClickListener
 
     private var mStyle = ItemStyle.DEFAULT
 
-    fun setItemClickListener(listener: OnItemClickListener) {
-        onItemClickListener = listener
+    fun setItemClickListener(listener: OnFolderClickListener) {
+        onFolderClickListener = listener
     }
 
     fun setItemStyle(style: ItemStyle) {
@@ -35,29 +35,29 @@ class PhotoAdapter(private val VM: PhotoAlbumViewModel) :
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderK {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FolderViewHolder {
         L.d("onCreateViewHolder")
-        return ViewHolderK.from(parent)
+        return FolderViewHolder.from(parent)
     }
 
-    override fun onBindViewHolder(holder: ViewHolderK, position: Int) {
-        holder.apply {
+    override fun onBindViewHolder(holderFolder: FolderViewHolder, position: Int) {
+        holderFolder.apply {
             val folder = getItem(position)
             bind(VM, folder)
             itemView.let { view ->
                 view.setOnClickListener {
-                    onItemClickListener.onItemClick(holder, holder.adapterPosition)
+                    onFolderClickListener.onItemClick(holderFolder, holderFolder.adapterPosition)
                 }
                 view.setOnLongClickListener {
-                    onItemClickListener.onItemLongClick(holder, holder.adapterPosition)
+                    onFolderClickListener.onItemLongClick(holderFolder, holderFolder.adapterPosition)
                     true
                 }
             }
 
             if (mStyle == ItemStyle.GRID) {
-                holder.binding.gicFolderCover.visibility = View.VISIBLE
-                holder.binding.ivFolderCover.visibility = View.GONE
-                val images = holder.binding.gicFolderCover.getImageViews()
+                holderFolder.binding.gicFolderCover.visibility = View.VISIBLE
+                holderFolder.binding.ivFolderCover.visibility = View.GONE
+                val images = holderFolder.binding.gicFolderCover.getImageViews()
                 for (iv in images) {
                     GlideApp.with(itemView)
                         .load(folder.firstImagePath)
@@ -68,22 +68,22 @@ class PhotoAdapter(private val VM: PhotoAlbumViewModel) :
                         .into(iv)
                 }
             } else if (mStyle == ItemStyle.DEFAULT) {
-                holder.binding.gicFolderCover.visibility = View.GONE
-                holder.binding.ivFolderCover.visibility = View.VISIBLE
+                holderFolder.binding.gicFolderCover.visibility = View.GONE
+                holderFolder.binding.ivFolderCover.visibility = View.VISIBLE
                 GlideApp.with(itemView)
                     .load(folder.firstImagePath)
                     .transition(withCrossFade())
                     .centerCrop()
                     .placeholder(R.drawable.image_placeholder)
                     .error(R.mipmap.ic_error)
-                    .into(holder.binding.ivFolderCover)
+                    .into(holderFolder.binding.ivFolderCover)
             }
         }
     }
 
 }
 
-class ViewHolderK private constructor(val binding: ItemFolerCoverBinding) :
+class FolderViewHolder private constructor(val binding: ItemFolerCoverBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
     fun bind(vm: PhotoAlbumViewModel, item: LocalMediaFolder) {
@@ -95,18 +95,18 @@ class ViewHolderK private constructor(val binding: ItemFolerCoverBinding) :
     }
 
     companion object {
-        fun from(parent: ViewGroup): ViewHolderK =
+        fun from(parent: ViewGroup): FolderViewHolder =
             parent.let {
                 val binding =
                     ItemFolerCoverBinding.inflate(LayoutInflater.from(it.context), it, false)
-                ViewHolderK(binding)
+                FolderViewHolder(binding)
             }
     }
 }
 
-interface OnItemClickListener {
-    fun onItemClick(holderK: ViewHolderK, position: Int)
-    fun onItemLongClick(holderK: ViewHolderK, position: Int)
+interface OnFolderClickListener {
+    fun onItemClick(holderFolder: FolderViewHolder, position: Int)
+    fun onItemLongClick(holderFolder: FolderViewHolder, position: Int)
 }
 
 class FolderDiffCallback : DiffUtil.ItemCallback<LocalMediaFolder>() {

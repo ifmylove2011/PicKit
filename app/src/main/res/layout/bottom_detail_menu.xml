@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:id="@+id/ll_bottom_detail_menu"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize">
+
+    <ImageButton
+        android:id="@+id/ibt_info"
+        android:src="@drawable/ic_detail_info"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/desc_info" />
+
+    <ImageButton
+        android:id="@+id/ibt_share"
+        android:src="@drawable/ic_share"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/desc_info" />
+
+    <ImageButton
+        android:id="@+id/ibt_delete"
+        android:src="@drawable/ic_remove"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/desc_info" />
+
+    <ImageButton
+        android:id="@+id/ibt_more"
+        android:src="@drawable/ic_more"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/desc_info" />
+</LinearLayout>

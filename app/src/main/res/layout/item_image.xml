@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="MediaData"
+            type="com.xter.pickit.entity.LocalMedia" />
+
+        <variable
+            name="photoVM"
+            type="com.xter.pickit.ui.album.PhotoAlbumViewModel" />
+    </data>
+
+    <com.xter.pickit.ui.widget.SquareRelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="2dp">
+
+        <ImageView
+            android:id="@+id/iv_ablum_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            android:contentDescription="@string/img_desc_cover" />
+
+    </com.xter.pickit.ui.widget.SquareRelativeLayout>
+</layout>

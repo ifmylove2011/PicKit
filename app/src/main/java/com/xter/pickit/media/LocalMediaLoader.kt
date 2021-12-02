@@ -11,8 +11,7 @@ import com.xter.pickit.entity.LocalMediaFolder
 import com.xter.pickit.kit.L
 import com.xter.pickit.kit.MimeUtil
 import com.xter.pickit.kit.PlatformUtil
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 
 /**
@@ -73,7 +72,7 @@ class LocalMediaLoader {
         COLUMN_BUCKET_ID,
         MediaStore.MediaColumns.DATE_ADDED,
         MediaStore.MediaColumns.DATE_MODIFIED
-        )
+    )
 
     private fun getFileSizeCondition(): String {
         return String.format(
@@ -175,186 +174,200 @@ class LocalMediaLoader {
         return queryArgs
     }
 
-    fun loadImageFolders(context: Context, listener: IQueryResultListener<LocalMediaFolder>) {
-        GlobalScope.launch {
-            //TODO 可能不只需要封面，预留
-            val selection = getSelectionForFolder()
-            L.d("selection is $selection")
-            context.contentResolver?.query(
-                QUERY_URI,
-                if (PlatformUtil.isQ()) PROJECTION_BUCKET_29 else PROJECTION_BUCKET,
-                selection,
-                arrayOf("" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE),
-                if (PlatformUtil.isR()) null else ORDER_BY
-            )?.let { cursor ->
-                val count: Int = cursor.getCount()
-                L.i("查询结果数量 count=$count")
-                var totalCount = 0
-                val mediaFolders: MutableList<LocalMediaFolder> = ArrayList<LocalMediaFolder>()
-                if (count > 0) {
-                    if (PlatformUtil.isQ()) {
-                        //高于Android10只能遍历所有来统计各目录数量
-                        val countMap: MutableMap<Long, Long> = HashMap()
-                        while (cursor.moveToNext()) {
-                            val bucketId: Long =
-                                cursor.getLong(cursor.getColumnIndex(COLUMN_BUCKET_ID))
-                            var newCount = countMap[bucketId]
-                            if (newCount == null) {
-                                newCount = 1L
-                            } else {
-                                newCount++
-                            }
-                            countMap[bucketId] = newCount
+    suspend fun loadImageFolders(
+        context: Context,
+        listener: IQueryResultListener<LocalMediaFolder>
+    ) = withContext(Dispatchers.IO) {
+        //TODO 可能不只需要封面，预留
+        val selection = getSelectionForFolder()
+        L.d("selection is $selection")
+        context.contentResolver?.query(
+            QUERY_URI,
+            if (PlatformUtil.isQ()) PROJECTION_BUCKET_29 else PROJECTION_BUCKET,
+            selection,
+            arrayOf("" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE),
+            if (PlatformUtil.isR()) null else ORDER_BY
+        )?.let { cursor ->
+            val count: Int = cursor.getCount()
+            L.i("查询结果数量 count=$count")
+            var totalCount = 0
+            val mediaFolders: MutableList<LocalMediaFolder> = ArrayList<LocalMediaFolder>()
+            if (count > 0) {
+                if (PlatformUtil.isQ()) {
+                    //高于Android10只能遍历所有来统计各目录数量
+                    val countMap: MutableMap<Long, Long> = HashMap()
+                    while (cursor.moveToNext()) {
+                        val bucketId: Long =
+                            cursor.getLong(cursor.getColumnIndex(COLUMN_BUCKET_ID))
+                        var newCount = countMap[bucketId]
+                        if (newCount == null) {
+                            newCount = 1L
+                        } else {
+                            newCount++
                         }
-                        L.d("map=$countMap")
-                        if (cursor.moveToFirst()) {
-                            val hashSet: MutableSet<Long> = HashSet()
-                            do {
-                                val bucketId: Long =
-                                    cursor.getLong(cursor.getColumnIndex(COLUMN_BUCKET_ID))
-                                if (hashSet.contains(bucketId)) {
-                                    continue
-                                }
-                                val bucketDisplayName: String? = cursor.getString(
-                                    cursor.getColumnIndex(COLUMN_BUCKET_DISPLAY_NAME)
-                                )
-                                val mimeType: String? =
-                                    cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
-                                val size = countMap[bucketId]!!
-                                val id: Long =
-                                    cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns._ID))
-
-                                val mediaFolder = LocalMediaFolder(
-                                    bucketId, bucketDisplayName, MimeUtil.getRealPathUri(
-                                        id,
-                                        mimeType
-                                    ), mimeType, size.toInt()
-                                )
-                                mediaFolders.add(mediaFolder)
-                                hashSet.add(bucketId)
-                                totalCount += size.toInt()
-                            } while (cursor.moveToNext())
-                        }
-                    } else {
-                        cursor.moveToFirst()
+                        countMap[bucketId] = newCount
+                    }
+                    L.d("map=$countMap")
+                    if (cursor.moveToFirst()) {
+                        val hashSet: MutableSet<Long> = HashSet()
                         do {
                             val bucketId: Long =
                                 cursor.getLong(cursor.getColumnIndex(COLUMN_BUCKET_ID))
-                            val bucketDisplayName: String? =
-                                cursor.getString(cursor.getColumnIndex(COLUMN_BUCKET_DISPLAY_NAME))
+                            if (hashSet.contains(bucketId)) {
+                                continue
+                            }
+                            val bucketDisplayName: String? = cursor.getString(
+                                cursor.getColumnIndex(COLUMN_BUCKET_DISPLAY_NAME)
+                            )
                             val mimeType: String? =
                                 cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
-                            val size: Int =
-                                cursor.getInt(cursor.getColumnIndex(COLUMN_COUNT))
-                            val url: String? =
-                                cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA))
-                            val dateModified = cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED))
+                            val size = countMap[bucketId]!!
+                            val id: Long =
+                                cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns._ID))
+
                             val mediaFolder = LocalMediaFolder(
-                                bucketId, bucketDisplayName, url, mimeType, size
+                                bucketId, bucketDisplayName, MimeUtil.getRealPathUri(
+                                    id,
+                                    mimeType
+                                ), mimeType, size.toInt()
                             )
-                            L.d("bucketId:$bucketId,bucketDisplayName:$bucketDisplayName")
-                            L.i("url:$url")
-                            L.i("date:$dateModified")
                             mediaFolders.add(mediaFolder)
-                            totalCount += size
+                            hashSet.add(bucketId)
+                            totalCount += size.toInt()
                         } while (cursor.moveToNext())
                     }
-                    L.i("total count=$totalCount")
-                    listener.onCompleted(mediaFolders)
-                }
-                cursor.close()
-            }
-        }
-    }
-
-    fun loadImages(context: Context, bucketId: Long,size:Int, listener: IQueryResultListener<LocalMedia>) {
-        GlobalScope.launch {
-            var cursor: Cursor? = null
-            val pageSelection = getPageSelection(bucketId)
-            val pageSelectionArgs = getPageSelectionArgs(bucketId)
-            L.i("selection=$pageSelection")
-            L.i("selectionArgs=${Arrays.toString(pageSelectionArgs)}")
-            if (PlatformUtil.isR()) {
-                val queryArgs: Bundle = createQueryArgsBundle(
-                    pageSelection,
-                    pageSelectionArgs,
-                    pageMaxSize,
-                    pageMaxSize
-                )
-                cursor = context.contentResolver.query(QUERY_URI, PROJECTION_PAGE, queryArgs, null)
-            } else {
-                //TODO 排序需要多个选择
-                val orderBy =
-                    if (mPage == -1) MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC" else MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC limit " + size
-                cursor = context.contentResolver.query(
-                    QUERY_URI,
-                    PROJECTION_PAGE,
-                    pageSelection,
-                    pageSelectionArgs,
-                    orderBy
-                )
-            }
-            cursor?.let { cursor ->
-                val count = cursor.count
-                L.i("image size = $count")
-                val localMediaData: MutableList<LocalMedia> = ArrayList<LocalMedia>()
-                if (count > 0) {
-                    val idColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(0))
-                    val dataColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(1))
-                    val mimeTypeColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(2))
-                    val widthColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(3))
-                    val heightColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(4))
-                    val durationColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(5))
-                    val sizeColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(6))
-                    val folderNameColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(7))
-                    val fileNameColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(8))
-                    val bucketIdColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(9))
-                    val dateAddedColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(10))
-                    cursor.moveToFirst()
-
-                    do {
-                        val id = cursor.getLong(idColumn)
-                        val mimeType = cursor.getString(mimeTypeColumn)
-                        val absolutePath = cursor.getString(dataColumn)
-                        val url = if (PlatformUtil.isQ()) MimeUtil.getRealPathUri(
-                            id,
-                            mimeType
-                        ) else absolutePath
-                        val width = cursor.getInt(widthColumn)
-                        val height = cursor.getInt(heightColumn)
-                        val duration = cursor.getLong(durationColumn)
-                        val size = cursor.getLong(sizeColumn)
-                        val folderName = cursor.getString(folderNameColumn)
-                        val fileName = cursor.getString(fileNameColumn)
-                        val bucketId = cursor.getLong(bucketIdColumn)
-                        val date = cursor.getLong(dateAddedColumn)
-
-                        val localMedia = LocalMedia.parseLocalMedia(
-                            id,
-                            url,
-                            absolutePath,
-                            fileName,
-                            folderName,
-                            duration,
-                            mimeType,
-                            width,
-                            height,
-                            size,
-                            bucketId,
-                            date
-                        )
-                        localMediaData.add(localMedia)
-
-                        L.d("url $url")
-                    } while (cursor.moveToNext())
-
-                    listener.onCompleted(localMediaData)
                 } else {
-                    L.w("未查询到数据")
+                    cursor.moveToFirst()
+                    do {
+                        val bucketId: Long =
+                            cursor.getLong(cursor.getColumnIndex(COLUMN_BUCKET_ID))
+                        val bucketDisplayName: String? =
+                            cursor.getString(cursor.getColumnIndex(COLUMN_BUCKET_DISPLAY_NAME))
+                        val mimeType: String? =
+                            cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
+                        val size: Int =
+                            cursor.getInt(cursor.getColumnIndex(COLUMN_COUNT))
+                        val url: String? =
+                            cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA))
+                        val dateModified =
+                            cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATE_MODIFIED))
+                        val mediaFolder = LocalMediaFolder(
+                            bucketId, bucketDisplayName, url, mimeType, size
+                        )
+//                            L.d("bucketId:$bucketId,bucketDisplayName:$bucketDisplayName")
+//                            L.i("url:$url")
+//                            L.i("date:$dateModified")
+                        mediaFolders.add(mediaFolder)
+                        totalCount += size
+                    } while (cursor.moveToNext())
                 }
+                L.i("total count=$totalCount")
+                listener.onCompleted(mediaFolders)
             }
+            cursor.close()
         }
     }
 
+    /**
+     * 根据目录查询图片信息
+     * @param context Context
+     * @param bucketId 目录ID
+     * @param size 查询数量，Android11开始分区存储，需要带入limit进行查询
+     * @param listener 结果监听
+     */
+    suspend fun loadImages(
+        context: Context,
+        bucketId: Long,
+        size: Int,
+        listener: IQueryResultListener<LocalMedia>
+    ) = withContext(Dispatchers.IO) {
+        var cursor: Cursor? = null
+        val pageSelection = getPageSelection(bucketId)
+        val pageSelectionArgs = getPageSelectionArgs(bucketId)
+        L.i("selection=$pageSelection")
+        L.i("selectionArgs=${Arrays.toString(pageSelectionArgs)}")
+        if (PlatformUtil.isR()) {
+            val queryArgs: Bundle = createQueryArgsBundle(
+                pageSelection,
+                pageSelectionArgs,
+                pageMaxSize,
+                pageMaxSize
+            )
+            cursor = context.contentResolver.query(QUERY_URI, PROJECTION_PAGE, queryArgs, null)
+        } else {
+            //TODO 排序需要多个选择
+            val orderBy =
+                if (mPage == -1) MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC" else MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC limit " + size
+            cursor = context.contentResolver.query(
+                QUERY_URI,
+                PROJECTION_PAGE,
+                pageSelection,
+                pageSelectionArgs,
+                orderBy
+            )
+        }
+        cursor?.let { cursor ->
+            val count = cursor.count
+            L.i("image size = $count")
+            val localMediaData: MutableList<LocalMedia> = ArrayList<LocalMedia>()
+            if (count > 0) {
+                val idColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(0))
+                val dataColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(1))
+                val mimeTypeColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(2))
+                val widthColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(3))
+                val heightColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(4))
+                val durationColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(5))
+                val sizeColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(6))
+                val folderNameColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(7))
+                val fileNameColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(8))
+                val bucketIdColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(9))
+                val dateAddedColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(10))
+                val dateModifiedColumn: Int = cursor.getColumnIndexOrThrow(PROJECTION_PAGE.get(11))
+                cursor.moveToFirst()
+
+                do {
+                    val id = cursor.getLong(idColumn)
+                    val mimeType = cursor.getString(mimeTypeColumn)
+                    val absolutePath = cursor.getString(dataColumn)
+                    val url = if (PlatformUtil.isQ()) MimeUtil.getRealPathUri(
+                        id,
+                        mimeType
+                    ) else absolutePath
+                    val width = cursor.getInt(widthColumn)
+                    val height = cursor.getInt(heightColumn)
+                    val duration = cursor.getLong(durationColumn)
+                    val size = cursor.getLong(sizeColumn)
+                    val folderName = cursor.getString(folderNameColumn)
+                    val fileName = cursor.getString(fileNameColumn)
+                    val bucketId = cursor.getLong(bucketIdColumn)
+                    val dateAdded = cursor.getLong(dateAddedColumn)
+                    val dateModified = cursor.getLong(dateModifiedColumn)
+
+                    val localMedia = LocalMedia(
+                        id,
+                        bucketId,
+                        fileName,
+                        folderName,
+                        url,
+                        absolutePath,
+                        duration,
+                        mimeType,
+                        width,
+                        height,
+                        size,
+                        dateAdded,
+                        dateModified
+                    )
+                    localMediaData.add(localMedia)
+
+//                        L.d(localMedia.toString())
+                } while (cursor.moveToNext())
+
+                listener.onCompleted(localMediaData)
+            } else {
+                L.w("未查询到数据，目录ID=$bucketId")
+            }
+        }
+    }
 
 }

@@ -8,21 +8,22 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
+import com.xter.pickit.entity.LocalMediaFolder
 import com.xter.pickit.kit.L
 
 /**
- * 相册视图，以文件夹为单位展示
+ * 相册图片视图，以图片为单位展示
  */
-class PhotoAlbumFragment : Fragment() {
+class PhotoContentFragment : Fragment() {
 
     companion object {
-        fun newInstance() = PhotoAlbumFragment()
+        fun newInstance() = PhotoContentFragment()
     }
 
     private lateinit var photoVM: PhotoAlbumViewModel
     private lateinit var photoBinding: FragmentPhotoAlbumBinding
 
-    private lateinit var photoFolderAdapter: PhotoAlbumAdapter
+    private lateinit var photoContentAdapter: PhotoContentAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,52 +42,53 @@ class PhotoAlbumFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         photoBinding.lifecycleOwner = this.viewLifecycleOwner
         photoBinding.rvAblum.apply {
-            layoutManager = GridLayoutManager(this.context, 2)
+            //TODO　可动态配置的GRID、LIST
+            layoutManager = GridLayoutManager(this.context, 3)
             photoBinding.vm?.let { VM ->
-                photoFolderAdapter = PhotoAlbumAdapter(VM)
+                photoContentAdapter = PhotoContentAdapter(VM)
             }
-            photoFolderAdapter.setItemClickListener(object : OnFolderClickListener {
-                override fun onItemClick(holderFolder: FolderViewHolder, position: Int) {
-                    val folder = holderFolder.binding.folder
-                    L.d(folder.toString())
-//                    photoVM.loadMediaFolder(requireContext(), folder)
+            photoContentAdapter.setItemClickListener(object : OnImageClickListener {
+                override fun onItemClick(contentHolder: ContentViewHolder, position: Int) {
+                    val mediaData = contentHolder.binding.mediaData
+                    L.i(mediaData.toString())
                     val bundle = Bundle()
-                    bundle.putParcelable(KEY_FOLDER, folder)
-                    findNavController().navigate(R.id.action_nav_ablum_to_nav_content, bundle)
+                    bundle.putParcelable(KEY_MEDIA_DATA, mediaData)
+                    findNavController().navigate(R.id.action_nav_content_to_nav_photo_detail, bundle)
                 }
 
-
-                override fun onItemLongClick(holderFolder: FolderViewHolder, position: Int) {
+                override fun onItemLongClick(contentHolder: ContentViewHolder, position: Int) {
 
                 }
 
             })
-            adapter = photoFolderAdapter
+            adapter = photoContentAdapter
         }
-        photoVM.folderLoadCompleted.observe(viewLifecycleOwner,
+        photoVM.contentLoadCompleted.observe(viewLifecycleOwner,
             {
                 L.i("loaded = $it")
                 if (it) {
-                    photoFolderAdapter.submitList(photoVM.folders.value)
-                    photoFolderAdapter.notifyDataSetChanged()
+                    photoContentAdapter.submitList(photoVM.images.value)
+                    photoContentAdapter.notifyDataSetChanged()
                 }
             })
-        photoVM.loadMediaFolder(requireContext())
-
+        arguments?.getParcelable<LocalMediaFolder>(KEY_FOLDER)?.let { folder ->
+            photoVM.loadMediaData(requireContext(), folder)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
+        inflater.inflate(R.menu.main_browser, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_layout_grid -> {
-                photoFolderAdapter.setItemStyle(ItemStyle.GRID)
+                photoContentAdapter.setContentStyle(ContentStyle.GRID)
                 true
             }
-            R.id.action_layout_default -> {
-                photoFolderAdapter.setItemStyle(ItemStyle.DEFAULT)
+            R.id.action_layout_list -> {
+                photoContentAdapter.setContentStyle(ContentStyle.LIST)
                 true
             }
             else -> false
