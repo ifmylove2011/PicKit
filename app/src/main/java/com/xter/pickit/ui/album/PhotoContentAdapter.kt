@@ -39,7 +39,6 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentViewHolder {
-        L.v("onCreateViewHolder")
         return ContentViewHolder.from(parent)
     }
 

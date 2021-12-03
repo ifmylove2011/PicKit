@@ -3,6 +3,7 @@ package com.xter.pickit
 import android.Manifest
 import android.os.Bundle
 import android.view.Menu
+import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity(),EasyPermissions.PermissionCallbacks{
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+//        window.requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

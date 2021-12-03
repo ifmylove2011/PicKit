@@ -180,7 +180,7 @@ class LocalMediaLoader {
     ) = withContext(Dispatchers.IO) {
         //TODO 可能不只需要封面，预留
         val selection = getSelectionForFolder()
-        L.d("selection is $selection")
+        L.i("selection is $selection")
         context.contentResolver?.query(
             QUERY_URI,
             if (PlatformUtil.isQ()) PROJECTION_BUCKET_29 else PROJECTION_BUCKET,

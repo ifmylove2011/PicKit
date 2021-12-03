@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.xter.pickit.R
 import com.xter.pickit.databinding.ItemImageBinding
+import com.xter.pickit.databinding.ItemImageDetailBinding
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.kit.GlideApp
 import com.xter.pickit.kit.L
@@ -28,18 +29,7 @@ class PhotoDetailAdapter(private val VM: PhotoAlbumViewModel) :
         onImageDetailClickListener = listener
     }
 
-    fun setContentStyle(style: ContentStyle) {
-        mStyle = style
-        L.d("style=${style.toString()}")
-        if (mStyle == ContentStyle.GRID) {
-
-        } else if (mStyle == ContentStyle.LIST) {
-        }
-        notifyDataSetChanged()
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DetailViewHolder {
-        L.v("onCreateViewHolder")
         return DetailViewHolder.from(parent)
     }
 
@@ -63,21 +53,20 @@ class PhotoDetailAdapter(private val VM: PhotoAlbumViewModel) :
             GlideApp.with(itemView)
                 .load(data.path)
                 .transition(DrawableTransitionOptions.withCrossFade())
-                .centerCrop()
                 .placeholder(R.drawable.image_placeholder)
                 .error(R.mipmap.ic_error)
-                .into(detailViewHolder.binding.ivAblumContent)
+                .into(detailViewHolder.binding.ivImageDetail)
         }
     }
 
 }
 
 interface OnImageDetailClickListener {
-    fun onItemClick(contentHolder: DetailViewHolder, position: Int)
-    fun onItemLongClick(contentHolder: DetailViewHolder, position: Int)
+    fun onItemClick(detailViewHolder: DetailViewHolder, position: Int)
+    fun onItemLongClick(detailViewHolder: DetailViewHolder, position: Int)
 }
 
-class DetailViewHolder private constructor(val binding: ItemImageBinding) :
+class DetailViewHolder private constructor(val binding: ItemImageDetailBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
     fun bind(vm: PhotoAlbumViewModel, item: LocalMedia) {
@@ -92,7 +81,7 @@ class DetailViewHolder private constructor(val binding: ItemImageBinding) :
         fun from(parent: ViewGroup): DetailViewHolder =
             parent.let {
                 val binding =
-                    ItemImageBinding.inflate(LayoutInflater.from(it.context), it, false)
+                    ItemImageDetailBinding.inflate(LayoutInflater.from(it.context), it, false)
                 DetailViewHolder(binding)
             }
     }

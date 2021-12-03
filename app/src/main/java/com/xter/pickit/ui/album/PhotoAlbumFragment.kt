@@ -1,7 +1,9 @@
 package com.xter.pickit.ui.album
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -29,11 +31,13 @@ class PhotoAlbumFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         photoVM = ViewModelProvider(requireActivity()).get(PhotoAlbumViewModel::class.java)
-        L.w(photoVM.toString())
         photoBinding = FragmentPhotoAlbumBinding.inflate(inflater, container, false).apply {
             this.vm = photoVM
         }
         setHasOptionsMenu(true)
+        (activity as AppCompatActivity).supportActionBar?.show()
+        L.d("backStackEntryCount=${this.fragmentManager?.backStackEntryCount}")
+        L.d("fragmentSize=${this.fragmentManager?.fragments?.size}")
         return photoBinding!!.root
     }
 
@@ -49,7 +53,6 @@ class PhotoAlbumFragment : Fragment() {
                 override fun onItemClick(holderFolder: FolderViewHolder, position: Int) {
                     val folder = holderFolder.binding.folder
                     L.d(folder.toString())
-//                    photoVM.loadMediaFolder(requireContext(), folder)
                     val bundle = Bundle()
                     bundle.putParcelable(KEY_FOLDER, folder)
                     findNavController().navigate(R.id.action_nav_ablum_to_nav_content, bundle)
@@ -71,8 +74,18 @@ class PhotoAlbumFragment : Fragment() {
                     photoFolderAdapter.notifyDataSetChanged()
                 }
             })
-        photoVM.loadMediaFolder(requireContext())
+        //目录数据几乎是不变的，因此可以用来判断是否已经加载过
+        if (photoVM.folders.value == null) {
+            photoVM.loadMediaFolder(requireContext())
+        }
+    }
 
+    fun createDetailFragment() {
+        val detailFragment = PhotoDetailFragment()
+        fragmentManager?.beginTransaction()?.let { ft ->
+            ft.add(detailFragment, TAG_DETAIL)
+            ft.commit()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

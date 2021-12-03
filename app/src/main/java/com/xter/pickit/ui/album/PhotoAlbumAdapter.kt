@@ -36,7 +36,6 @@ class PhotoAlbumAdapter(private val VM: PhotoAlbumViewModel) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FolderViewHolder {
-        L.d("onCreateViewHolder")
         return FolderViewHolder.from(parent)
     }
 

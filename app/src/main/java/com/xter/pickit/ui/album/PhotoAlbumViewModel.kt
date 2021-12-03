@@ -11,6 +11,9 @@ import kotlinx.coroutines.launch
 
 const val KEY_FOLDER = "folder"
 const val KEY_MEDIA_DATA = "mediaData"
+const val KEY_MEDIA_DATA_POS = "mediaDataPos"
+
+const val TAG_DETAIL = "detail"
 
 class PhotoAlbumViewModel : ViewModel() {
 
@@ -25,6 +28,14 @@ class PhotoAlbumViewModel : ViewModel() {
      */
     val folders: MutableLiveData<List<LocalMediaFolder>> = MutableLiveData<List<LocalMediaFolder>>()
     val images: MutableLiveData<List<LocalMedia>> = MutableLiveData<List<LocalMedia>>()
+
+    val currentPos:MutableLiveData<Int> = MutableLiveData(0)
+
+    fun changePos(pos:Int){
+        viewModelScope.launch {
+            currentPos.value = pos
+        }
+    }
 
     /**
      * 查找所有图片
@@ -52,6 +63,10 @@ class PhotoAlbumViewModel : ViewModel() {
         viewModelScope.launch {
             contentLoadCompleted.value = false
             folder?.let {
+                if(it.bucketId == images.value?.get(0)?.bucketId){
+                    contentLoadCompleted.value = true
+                    return@let
+                }
                 LocalMediaLoader.INSTANCE.loadImages(
                     context,
                     it.bucketId,
@@ -63,7 +78,7 @@ class PhotoAlbumViewModel : ViewModel() {
                                 images.value = data
                                 contentLoadCompleted.value = true
                             }
-                            L.w("image num = ${data.size}")
+                            L.w("${folder.name} image num = ${data.size}")
                         }
                     })
             }
