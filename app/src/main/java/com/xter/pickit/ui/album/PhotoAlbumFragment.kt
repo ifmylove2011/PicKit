@@ -10,6 +10,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
+import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
 
 /**
@@ -30,14 +31,13 @@ class PhotoAlbumFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        photoVM = ViewModelProvider(requireActivity()).get(PhotoAlbumViewModel::class.java)
+//        photoVM = ViewModelProvider(requireActivity()).get(PhotoAlbumViewModel::class.java)
+        photoVM = ViewModelFactory.create(PhotoAlbumViewModel::class.java)
         photoBinding = FragmentPhotoAlbumBinding.inflate(inflater, container, false).apply {
             this.vm = photoVM
         }
         setHasOptionsMenu(true)
         (activity as AppCompatActivity).supportActionBar?.show()
-        L.d("backStackEntryCount=${this.fragmentManager?.backStackEntryCount}")
-        L.d("fragmentSize=${this.fragmentManager?.fragments?.size}")
         return photoBinding!!.root
     }
 

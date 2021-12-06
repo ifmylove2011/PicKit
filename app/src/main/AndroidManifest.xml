@@ -11,9 +11,15 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.PicKit">
+        <activity
+            android:name=".ui.album.PhotoDetailActivity"
+            android:label="@string/img_desc_detail"
+            android:theme="@style/Theme.PicKit.NoActionBar" />
+
         <meta-data
             android:name="com.xter.pickit.kit.PhotoModule"
             android:value="AppGlideModule" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

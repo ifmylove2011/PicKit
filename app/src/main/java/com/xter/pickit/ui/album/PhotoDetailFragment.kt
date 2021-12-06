@@ -4,13 +4,11 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoDetailBinding
+import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
-import com.xter.pickit.ui.group.GroupFragment
 
 /**
 
@@ -36,13 +34,12 @@ class PhotoDetailFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        photoVM = ViewModelProvider(requireActivity()).get(PhotoAlbumViewModel::class.java)
+//        photoVM = ViewModelProvider(requireActivity()).get(PhotoAlbumViewModel::class.java)
+        photoVM = ViewModelFactory.create(PhotoAlbumViewModel::class.java)
         detailBinding = FragmentPhotoDetailBinding.inflate(inflater, container, false).apply {
             this.vm = photoVM
         }
         setHasOptionsMenu(true)
-        L.d("backStackEntryCount=${this.fragmentManager?.backStackEntryCount}")
-        L.d("fragmentSize=${this.fragmentManager?.fragments?.size}")
         return detailBinding!!.root
     }
 

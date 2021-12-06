@@ -10,7 +10,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withC
 import com.xter.pickit.R
 import com.xter.pickit.databinding.ItemFolerCoverBinding
 import com.xter.pickit.entity.LocalMediaFolder
-import com.xter.pickit.kit.GlideApp
+import com.xter.pickit.ext.GlideApp
 import com.xter.pickit.kit.L
 
 /**

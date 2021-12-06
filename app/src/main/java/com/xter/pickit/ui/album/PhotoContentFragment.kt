@@ -1,5 +1,6 @@
 package com.xter.pickit.ui.album
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
 import com.xter.pickit.entity.LocalMediaFolder
+import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
 
 /**
@@ -30,14 +32,13 @@ class PhotoContentFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        photoVM = ViewModelProvider(requireActivity()).get(PhotoAlbumViewModel::class.java)
+//        photoVM = ViewModelProvider(requireActivity()).get(PhotoAlbumViewModel::class.java)
+        photoVM = ViewModelFactory.create(PhotoAlbumViewModel::class.java)
         photoBinding = FragmentPhotoAlbumBinding.inflate(inflater, container, false).apply {
             this.vm = photoVM
         }
         setHasOptionsMenu(true)
 
-        L.d("backStackEntryCount=${this.fragmentManager?.backStackEntryCount}")
-        L.d("fragmentSize=${this.fragmentManager?.fragments?.size}")
         return photoBinding!!.root
     }
 
@@ -54,11 +55,18 @@ class PhotoContentFragment : Fragment() {
                 override fun onItemClick(contentHolder: ContentViewHolder, position: Int) {
                     val mediaData = contentHolder.binding.mediaData
                     L.i(mediaData.toString())
-                    val bundle = Bundle()
-                    bundle.putInt(KEY_MEDIA_DATA_POS, position)
-                    //使用nav虽然方便，但每次会replace初始化fragment，考虑到detail页面的复用频率，其实应该想办法自行管理
-                    findNavController().navigate(R.id.action_nav_content_to_nav_photo_detail,bundle)
+//                    val bundle = Bundle()
+//                    bundle.putInt(KEY_MEDIA_DATA_POS, position)
+//                    //使用nav虽然方便，但每次会replace初始化fragment，考虑到detail页面的复用频率，其实应该想办法自行管理
+//                    findNavController().navigate(
+//                        R.id.action_nav_content_to_nav_photo_detail,
+//                        bundle
+//                    )
 //                    photoVM.changePos(position)
+                    Intent(requireActivity(), PhotoDetailActivity::class.java).let { intent ->
+                        intent.putExtra(KEY_MEDIA_DATA_POS, position)
+                        startActivity(intent)
+                    }
                 }
 
                 override fun onItemLongClick(contentHolder: ContentViewHolder, position: Int) {
@@ -77,16 +85,16 @@ class PhotoContentFragment : Fragment() {
                 }
             })
         arguments?.getParcelable<LocalMediaFolder>(KEY_FOLDER)?.let { folder ->
-            (activity as AppCompatActivity).supportActionBar?.let{ toolbar->
+            (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
                 toolbar.title = folder.name
             }
             photoVM.loadMediaData(requireContext(), folder)
         }
     }
 
-    fun showDetailFragment(){
-        fragmentManager?.let{ fm->
-            fm.beginTransaction()?.let { ft->
+    fun showDetailFragment() {
+        fragmentManager?.let { fm ->
+            fm.beginTransaction()?.let { ft ->
                 fm.findFragmentByTag(TAG_DETAIL)?.let { ft.show(it) }
             }
         }
