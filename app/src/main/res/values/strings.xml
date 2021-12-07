@@ -52,4 +52,23 @@
     <string name="text_count_default">0</string>
     <string name="text_default_folder">pic</string>
 
+    <string name="title">标题</string>
+    <string name="type">类型</string>
+    <string name="time">时间</string>
+    <string name="size">大小</string>
+    <string name="dimension">尺寸</string>
+    <string name="path">路径</string>
+    <string name="location">位置</string>
+    <string name="manufacturer">制造商</string>
+    <string name="model">模型</string>
+    <string name="flashlight">闪光灯</string>
+    <string name="focus">焦距</string>
+    <string name="white_balance">白平衡</string>
+    <string name="aperture">光圈</string>
+    <string name="exposure">曝光</string>
+    <string name="iso">ISO</string>
+    <string name="altitude">海拔</string>
+
+    <string name="sure">确定</string>
+    <string name="cancel">取消</string>
 </resources>
