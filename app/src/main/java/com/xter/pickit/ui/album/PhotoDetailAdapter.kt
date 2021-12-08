@@ -35,6 +35,19 @@ class PhotoDetailAdapter(private val VM: PhotoAlbumViewModel) :
         detailViewHolder.apply {
             val data = getItem(position)
             bind(VM, data)
+//            detailViewHolder.binding.ivImageDetail.apply {
+//                enable()
+//                setOnClickListener{
+//                    onImageDetailClickListener.onItemClick(detailViewHolder, detailViewHolder.adapterPosition)
+//                }
+//                setOnLongClickListener {
+//                    onImageDetailClickListener.onItemLongClick(
+//                        detailViewHolder,
+//                        detailViewHolder.adapterPosition
+//                    )
+//                    true
+//                }
+//            }
             itemView.let { view ->
                 view.setOnClickListener {
                     onImageDetailClickListener.onItemClick(detailViewHolder, detailViewHolder.adapterPosition)

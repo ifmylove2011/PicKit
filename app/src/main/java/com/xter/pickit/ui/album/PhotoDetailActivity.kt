@@ -9,9 +9,11 @@ import android.view.View.VISIBLE
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ScaleGestureDetectorCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.xter.pickit.R
 import com.xter.pickit.databinding.ActivityDetailBinding
+import com.xter.pickit.databinding.DialogDetail1Binding
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
@@ -52,6 +54,7 @@ class PhotoDetailActivity : AppCompatActivity() {
             this.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     supportActionBar?.let { toolbar ->
+                        photoVM.currentPos.value = position
                         toolbar.title = photoVM.images.value?.get(position)?.name
                         toolbar.subtitle = "${position + 1}/${photoVM.images.value?.size}"
                     }
@@ -66,7 +69,6 @@ class PhotoDetailActivity : AppCompatActivity() {
                 }
 
                 override fun onItemLongClick(detailViewHolder: DetailViewHolder, position: Int) {
-                    //TODO 弹出详情
                     popDetailDialog(detailViewHolder.binding.mediaData)
                 }
 
@@ -116,11 +118,19 @@ class PhotoDetailActivity : AppCompatActivity() {
         }
     }
 
-    fun popDetailDialog(mediaData: LocalMedia?) {
+    /**
+     * 弹出图片信息展示对话框
+     */
+    private fun popDetailDialog(mediaData: LocalMedia?) {
         val view = View.inflate(this, R.layout.dialog_detail_1, null)
+        DialogDetail1Binding.bind(view).apply {
+            this.mediadata = mediaData
+            this.executePendingBindings()
+        }
         AlertDialog.Builder(this)
-                //试一下binding
+            .setTitle("${photoVM.currentPos.value?.plus(1)}/${photoVM.images.value?.size}")
             .setView(view)
+            .setCancelable(false)
             .setPositiveButton(
                 R.string.sure
             ) { dialog, _ -> dialog?.dismiss() }
@@ -129,7 +139,6 @@ class PhotoDetailActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.image_detail, menu)
         return true
     }

@@ -13,12 +13,13 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.xter.pickit.databinding.ActivityMainBinding
+import com.xter.pickit.db.RoomDBM
 import com.xter.pickit.kit.L
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 
 
-class MainActivity : AppCompatActivity(),EasyPermissions.PermissionCallbacks{
+class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -49,9 +50,16 @@ class MainActivity : AppCompatActivity(),EasyPermissions.PermissionCallbacks{
         checkPermission()
     }
 
-    fun checkPermission(){
-        if(!EasyPermissions.hasPermissions(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-            EasyPermissions.requestPermissions(this,"需要读写存储权限",PERMISSION_CODE,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    fun checkPermission() {
+        if (!EasyPermissions.hasPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            EasyPermissions.requestPermissions(
+                this,
+                "需要读写存储权限",
+                PERMISSION_CODE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        } else {
+            RoomDBM.get().init(this)
         }
     }
 
@@ -73,7 +81,7 @@ class MainActivity : AppCompatActivity(),EasyPermissions.PermissionCallbacks{
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode,permissions,grantResults,this)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
