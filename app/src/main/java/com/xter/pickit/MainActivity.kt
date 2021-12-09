@@ -37,8 +37,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_ablum, R.id.nav_group, R.id.nav_settings
@@ -86,6 +85,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
         L.d("存储权限GET")
+        RoomDBM.get().init(this)
+        findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.nav_ablum)
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {

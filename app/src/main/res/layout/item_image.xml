@@ -23,8 +23,15 @@
             android:id="@+id/iv_ablum_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible"
-            android:contentDescription="@string/img_desc_cover" />
+            android:contentDescription="@string/img_desc_cover"
+            android:visibility="visible" />
+
+        <CheckBox
+            android:id="@+id/cb_selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:visibility="gone" />
 
     </com.xter.pickit.ui.widget.SquareRelativeLayout>
 </layout>

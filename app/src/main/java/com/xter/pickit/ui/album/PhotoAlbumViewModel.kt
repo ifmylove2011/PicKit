@@ -30,6 +30,7 @@ class PhotoAlbumViewModel : ViewModel() {
     val images: MutableLiveData<List<LocalMedia>> = MutableLiveData<List<LocalMedia>>()
 
     val currentPos:MutableLiveData<Int> = MutableLiveData(0)
+    val selectNum:MutableLiveData<Int> = MutableLiveData(0)
 
     fun changePos(pos:Int){
         viewModelScope.launch {

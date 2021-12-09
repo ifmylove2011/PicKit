@@ -1,7 +1,9 @@
 package com.xter.pickit.ui.album
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -24,8 +26,18 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
 
     private var mStyle = ContentStyle.GRID
 
+    /**
+     * 多选是否开启
+     */
+    private var choiceModeOpen = false
+
     fun setItemClickListener(listener: OnImageClickListener) {
         onImageClickListener = listener
+    }
+
+    fun setChoiceModeOpen(open: Boolean) {
+        choiceModeOpen = open
+        notifyDataSetChanged()
     }
 
     fun setContentStyle(style: ContentStyle) {
@@ -46,11 +58,32 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
         holderContent.apply {
             val data = getItem(position)
             bind(VM, data)
-            itemView.let { view ->
+
+            binding.cbSelected.visibility = if (choiceModeOpen) View.VISIBLE else View.GONE
+            binding.cbSelected.setOnCheckedChangeListener { _, isChecked ->
+                L.i("adpaterPos=${holderContent.adapterPosition}")
+                data.isSelected = isChecked
+                    VM.selectNum.value =
+                        if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
+            }
+            binding.root.let { view ->
                 view.setOnClickListener {
-                    onImageClickListener.onItemClick(holderContent, holderContent.adapterPosition)
+                    if (choiceModeOpen) {
+                        binding.cbSelected.isChecked = !binding.cbSelected.isChecked
+                    } else {
+                        onImageClickListener.onItemClick(
+                            holderContent,
+                            holderContent.adapterPosition
+                        )
+                    }
                 }
                 view.setOnLongClickListener {
+                    //进入多选状态
+                    if (binding.cbSelected.visibility == View.GONE) {
+                        binding.cbSelected.isChecked = !binding.cbSelected.isChecked
+                        setChoiceModeOpen(true)
+                        L.i("adpaterPos=${holderContent.adapterPosition}")
+                    }
                     onImageClickListener.onItemLongClick(
                         holderContent,
                         holderContent.adapterPosition

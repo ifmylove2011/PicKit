@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="group"
+            type="com.xter.pickit.entity.LocalMediaGroup" />
+
+        <variable
+            name="photoGroupVM"
+            type="com.xter.pickit.ui.group.PhotoGroupViewModel" />
+    </data>
+
+    <com.xter.pickit.ui.widget.SquareRelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="2dp">
+
+        <ImageView
+            android:id="@+id/iv_group_cover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            android:contentDescription="@string/img_desc_cover" />
+
+        <com.xter.pickit.ui.widget.GridImageContainer
+            android:id="@+id/gic_group_cover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:column="2"
+            app:padding="1dp"
+            app:row="2" />
+
+        <TextView
+            android:id="@+id/tv_group_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="@{String.valueOf(group.imageNum)}"
+            android:textColor="@color/purple" />
+
+        <TextView
+            android:id="@+id/tv_group_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/tv_group_count"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="@{group.name}"
+            android:textColor="@color/purple" />
+    </com.xter.pickit.ui.widget.SquareRelativeLayout>
+</layout>

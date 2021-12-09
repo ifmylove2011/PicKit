@@ -55,14 +55,6 @@ class PhotoContentFragment : Fragment() {
                 override fun onItemClick(contentHolder: ContentViewHolder, position: Int) {
                     val mediaData = contentHolder.binding.mediaData
                     L.i(mediaData.toString())
-//                    val bundle = Bundle()
-//                    bundle.putInt(KEY_MEDIA_DATA_POS, position)
-//                    //使用nav虽然方便，但每次会replace初始化fragment，考虑到detail页面的复用频率，其实应该想办法自行管理
-//                    findNavController().navigate(
-//                        R.id.action_nav_content_to_nav_photo_detail,
-//                        bundle
-//                    )
-//                    photoVM.changePos(position)
                     Intent(requireActivity(), PhotoDetailActivity::class.java).let { intent ->
                         intent.putExtra(KEY_MEDIA_DATA_POS, position)
                         startActivity(intent)
@@ -70,7 +62,7 @@ class PhotoContentFragment : Fragment() {
                 }
 
                 override fun onItemLongClick(contentHolder: ContentViewHolder, position: Int) {
-
+                    //长按选中，并进入多选状态
                 }
 
             })
@@ -90,6 +82,18 @@ class PhotoContentFragment : Fragment() {
             }
             photoVM.loadMediaData(requireContext(), folder)
         }
+        photoVM.selectNum.observe(viewLifecycleOwner, { selectNum ->
+            L.i("select=$selectNum")
+            (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
+                if (selectNum != 0 && toolbar.title.contentEquals("(")) {
+                    toolbar.title = toolbar.title?.let {
+                        val title = it.substring(0, it.indexOf("("))
+                        L.i("title=$title")
+                        "$title($selectNum)"
+                    }
+                }
+            }
+        })
     }
 
     fun showDetailFragment() {

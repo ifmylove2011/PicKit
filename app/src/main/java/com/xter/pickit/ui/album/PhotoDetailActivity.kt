@@ -1,6 +1,5 @@
 package com.xter.pickit.ui.album
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -9,7 +8,6 @@ import android.view.View.VISIBLE
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ScaleGestureDetectorCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.xter.pickit.R
 import com.xter.pickit.databinding.ActivityDetailBinding

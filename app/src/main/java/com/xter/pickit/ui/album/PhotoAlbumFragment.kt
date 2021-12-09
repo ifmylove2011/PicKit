@@ -1,5 +1,6 @@
 package com.xter.pickit.ui.album
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.*
@@ -12,6 +13,7 @@ import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
 import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
+import pub.devrel.easypermissions.EasyPermissions
 
 /**
  * 相册视图，以文件夹为单位展示
@@ -37,7 +39,6 @@ class PhotoAlbumFragment : Fragment() {
             this.vm = photoVM
         }
         setHasOptionsMenu(true)
-        (activity as AppCompatActivity).supportActionBar?.show()
         return photoBinding!!.root
     }
 
@@ -65,6 +66,9 @@ class PhotoAlbumFragment : Fragment() {
 
             })
             adapter = photoFolderAdapter
+        }
+        if (!EasyPermissions.hasPermissions(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            return
         }
         photoVM.folderLoadCompleted.observe(viewLifecycleOwner,
             {

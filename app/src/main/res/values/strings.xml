@@ -71,4 +71,6 @@
 
     <string name="sure">确定</string>
     <string name="cancel">取消</string>
+    <string name="create">新建</string>
+    <string name="create_group">新建分组</string>
 </resources>

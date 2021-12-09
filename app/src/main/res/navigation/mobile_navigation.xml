@@ -24,26 +24,13 @@
         android:name="com.xter.pickit.ui.album.PhotoContentFragment"
         android:label="@string/menu_brower"
         tools:layout="@layout/fragment_photo_album" >
-        <action
-            app:popEnterAnim="@anim/anim_fade_in"
-            app:popExitAnim="@anim/anim_fade_out"
-            app:enterAnim="@anim/anim_fade_in"
-            app:exitAnim="@anim/anim_fade_out"
-            android:id="@+id/action_nav_content_to_nav_photo_detail"
-            app:destination="@id/nav_photo_detail" />
     </fragment>
 
     <fragment
-        android:id="@+id/nav_photo_detail"
-        android:name="com.xter.pickit.ui.album.PhotoDetailFragment"
-        android:label="@string/menu_detail"
-        tools:layout="@layout/fragment_photo_detail" />
-
-    <fragment
         android:id="@+id/nav_group"
-        android:name="com.xter.pickit.ui.gallery.GalleryFragment"
+        android:name="com.xter.pickit.ui.group.PhotoGroupFragment"
         android:label="@string/menu_group"
-        tools:layout="@layout/fragment_gallery" >
+        tools:layout="@layout/fragment_photo_group" >
     </fragment>
 
     <fragment

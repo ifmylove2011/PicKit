@@ -17,7 +17,7 @@ class ExampleUnitTest {
 
     @Test
     fun calc(){
-        val row = 2
-
+        val str = "PhotoView(20)"
+        println(str.substring(0,str.indexOf("(")))
     }
 }

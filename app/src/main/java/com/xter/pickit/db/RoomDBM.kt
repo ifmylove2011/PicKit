@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 /**
  * @Author XTER
  * @Date 2021/12/8 16:00
- * @Description
+ * @Description 数据管理
  */
 class RoomDBM private constructor() {
     companion object {
@@ -35,5 +35,13 @@ class RoomDBM private constructor() {
 
     suspend fun insertGroup(group: LocalMediaGroup): Long = withContext(Dispatchers.IO) {
         return@withContext database?.mediaDao()?.insertGroup(group)!!
+    }
+
+    suspend fun updateGroup(group: LocalMediaGroup): Int = withContext(Dispatchers.IO) {
+        return@withContext database?.mediaDao()?.updateGroup(group)!!
+    }
+
+    suspend fun queryGroup():List<LocalMediaGroup>? = withContext(Dispatchers.IO){
+        return@withContext database?.mediaDao()?.queryGroup()
     }
 }
