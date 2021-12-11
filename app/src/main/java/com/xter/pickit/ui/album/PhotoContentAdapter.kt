@@ -59,13 +59,19 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
             val data = getItem(position)
             bind(VM, data)
 
-            binding.cbSelected.visibility = if (choiceModeOpen) View.VISIBLE else View.GONE
+            //先放监听，以确定数据选中状态与数量
             binding.cbSelected.setOnCheckedChangeListener { _, isChecked ->
-                L.i("adpaterPos=${holderContent.adapterPosition}")
                 data.isSelected = isChecked
                     VM.selectNum.value =
                         if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
             }
+            if(choiceModeOpen){
+                binding.cbSelected.visibility = View.VISIBLE
+                binding.cbSelected.isChecked = data.isSelected
+            }else{
+                binding.cbSelected.visibility = View.GONE
+            }
+
             binding.root.let { view ->
                 view.setOnClickListener {
                     if (choiceModeOpen) {
@@ -80,9 +86,8 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
                 view.setOnLongClickListener {
                     //进入多选状态
                     if (binding.cbSelected.visibility == View.GONE) {
-                        binding.cbSelected.isChecked = !binding.cbSelected.isChecked
+                        data.isSelected = true
                         setChoiceModeOpen(true)
-                        L.i("adpaterPos=${holderContent.adapterPosition}")
                     }
                     onImageClickListener.onItemLongClick(
                         holderContent,

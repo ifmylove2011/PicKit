@@ -188,7 +188,7 @@ class LocalMediaLoader {
             arrayOf("" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE),
             if (PlatformUtil.isR()) null else ORDER_BY
         )?.let { cursor ->
-            val count: Int = cursor.getCount()
+            val count: Int = cursor.count
             L.i("查询结果数量 count=$count")
             var totalCount = 0
             val mediaFolders: MutableList<LocalMediaFolder> = ArrayList<LocalMediaFolder>()
@@ -285,7 +285,7 @@ class LocalMediaLoader {
         val pageSelection = getPageSelection(bucketId)
         val pageSelectionArgs = getPageSelectionArgs(bucketId)
         L.i("selection=$pageSelection")
-        L.i("selectionArgs=${Arrays.toString(pageSelectionArgs)}")
+        L.i("selectionArgs=${pageSelectionArgs.contentToString()}")
         if (PlatformUtil.isR()) {
             val queryArgs: Bundle = createQueryArgsBundle(
                 pageSelection,

@@ -52,5 +52,12 @@
             android:singleLine="true"
             android:text="@{group.name}"
             android:textColor="@color/purple" />
+
+        <CheckBox
+            android:id="@+id/cb_selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:visibility="gone" />
     </com.xter.pickit.ui.widget.SquareRelativeLayout>
 </layout>

@@ -48,8 +48,8 @@ class PhotoDetailFragment : Fragment() {
 //        detailBinding.toolbar.inflateMenu(R.menu.image_detail)
 //    }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         detailBinding.lifecycleOwner = this.viewLifecycleOwner
         detailBinding.vpImageDetail.apply {
             detailBinding.vm?.let { VM ->

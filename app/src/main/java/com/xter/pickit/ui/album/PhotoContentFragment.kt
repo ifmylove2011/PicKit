@@ -42,8 +42,8 @@ class PhotoContentFragment : Fragment() {
         return photoBinding!!.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         photoBinding.lifecycleOwner = this.viewLifecycleOwner
         photoBinding.rvAblum.apply {
             //TODO　可动态配置的GRID、LIST
@@ -82,14 +82,27 @@ class PhotoContentFragment : Fragment() {
             }
             photoVM.loadMediaData(requireContext(), folder)
         }
+
+        photoVM.selectNum.value = 0
         photoVM.selectNum.observe(viewLifecycleOwner, { selectNum ->
             L.i("select=$selectNum")
             (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
-                if (selectNum != 0 && toolbar.title.contentEquals("(")) {
-                    toolbar.title = toolbar.title?.let {
-                        val title = it.substring(0, it.indexOf("("))
-                        L.i("title=$title")
-                        "$title($selectNum)"
+                if (selectNum > 0) {
+                    if (toolbar.title.toString().contains("(")) {
+                        toolbar.title = toolbar.title?.let {
+                            val title = it.substring(0, it.indexOf("("))
+                            L.i("title=$title")
+                            "$title($selectNum)"
+                        }
+                    } else {
+                        toolbar.title = "${toolbar.title}($selectNum)"
+                    }
+                } else {
+                    if (toolbar.title.toString().contains("(")) {
+                        toolbar.title = toolbar.title?.let {
+                            val title = it.substring(0, it.indexOf("("))
+                            title
+                        }
                     }
                 }
             }

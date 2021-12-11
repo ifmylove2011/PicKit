@@ -44,4 +44,8 @@ class RoomDBM private constructor() {
     suspend fun queryGroup():List<LocalMediaGroup>? = withContext(Dispatchers.IO){
         return@withContext database?.mediaDao()?.queryGroup()
     }
+
+    suspend fun deleteGroups(groups :List<LocalMediaGroup>):Int? = withContext(Dispatchers.IO){
+        return@withContext database?.mediaDao()?.deleteGroups(groups)
+    }
 }

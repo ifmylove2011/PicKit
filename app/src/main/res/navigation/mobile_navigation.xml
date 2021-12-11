@@ -9,29 +9,41 @@
         android:id="@+id/nav_ablum"
         android:name="com.xter.pickit.ui.album.PhotoAlbumFragment"
         android:label="@string/menu_dir"
-        tools:layout="@layout/fragment_photo_album" >
+        tools:layout="@layout/fragment_photo_album">
         <action
-            app:popEnterAnim="@anim/anim_fade_in"
-            app:popExitAnim="@anim/anim_fade_out"
+            android:id="@+id/action_nav_ablum_to_nav_content"
+            app:destination="@id/nav_content"
             app:enterAnim="@anim/anim_fade_in"
             app:exitAnim="@anim/anim_fade_out"
-            android:id="@+id/action_nav_ablum_to_nav_content"
-            app:destination="@id/nav_content" />
+            app:popEnterAnim="@anim/anim_fade_in"
+            app:popExitAnim="@anim/anim_fade_out" />
     </fragment>
 
     <fragment
         android:id="@+id/nav_content"
         android:name="com.xter.pickit.ui.album.PhotoContentFragment"
         android:label="@string/menu_brower"
-        tools:layout="@layout/fragment_photo_album" >
-    </fragment>
+        tools:layout="@layout/fragment_photo_album" />
 
     <fragment
         android:id="@+id/nav_group"
         android:name="com.xter.pickit.ui.group.PhotoGroupFragment"
         android:label="@string/menu_group"
-        tools:layout="@layout/fragment_photo_group" >
+        tools:layout="@layout/fragment_photo_group">
+        <action
+            android:id="@+id/action_nav_group_to_nav_group_content"
+            app:destination="@id/nav_group_content"
+            app:enterAnim="@anim/anim_fade_in"
+            app:exitAnim="@anim/anim_fade_out"
+            app:popEnterAnim="@anim/anim_fade_in"
+            app:popExitAnim="@anim/anim_fade_out" />
     </fragment>
+
+    <fragment
+        android:id="@+id/nav_group_content"
+        android:name="com.xter.pickit.ui.group.PhotoGroupContentFragment"
+        android:label="@string/menu_brower"
+        tools:layout="@layout/fragment_photo_group_content" />
 
     <fragment
         android:id="@+id/nav_settings"

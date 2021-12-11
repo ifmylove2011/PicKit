@@ -1,5 +1,6 @@
 package com.xter.pickit.ui.group
 
+import android.content.Context
 import android.text.TextUtils
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.xter.pickit.db.RoomDBM
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.entity.LocalMediaGroup
 import com.xter.pickit.kit.L
+import com.xter.pickit.ui.album.ContentStyle
 import kotlinx.coroutines.launch
 
 /**
@@ -16,6 +18,10 @@ import kotlinx.coroutines.launch
  * @Date 2021/12/9 9:28
  * @Description
  */
+
+const val KEY_GROUP = "group"
+
+
 class PhotoGroupViewModel : ViewModel() {
 
     /**
@@ -23,6 +29,7 @@ class PhotoGroupViewModel : ViewModel() {
      */
     val groupLoadCompleted = MutableLiveData<Boolean>(false)
     val dataLoadCompleted = MutableLiveData<Boolean>(false)
+    val choiceModeOpen = MutableLiveData<Boolean>(false)
 
     /**
      * 有图片的分组列表
@@ -30,6 +37,8 @@ class PhotoGroupViewModel : ViewModel() {
     val groups: MutableLiveData<List<LocalMediaGroup>> = MutableLiveData<List<LocalMediaGroup>>()
     val images: MutableLiveData<List<LocalMedia>> = MutableLiveData<List<LocalMedia>>()
 
+    val selectGroupNum:MutableLiveData<Int> = MutableLiveData(0)
+    val selectNum:MutableLiveData<Int> = MutableLiveData(0)
 
     fun createNewGroup(groupName: String?) {
         viewModelScope.launch {
@@ -47,6 +56,19 @@ class PhotoGroupViewModel : ViewModel() {
         }
     }
 
+    fun deleteGroups(groups:List<LocalMediaGroup>){
+        viewModelScope.launch {
+            RoomDBM.get().deleteGroups(groups)?.let { rows->
+                if(rows>0){
+                    L.i("删除group $rows")
+                    selectGroupNum.value = 0
+                    choiceModeOpen.value = false
+                    loadGroups()
+                }
+            }
+        }
+    }
+
 
     fun loadGroups() {
         viewModelScope.launch {
@@ -55,5 +77,9 @@ class PhotoGroupViewModel : ViewModel() {
             groups.value = data
             groupLoadCompleted.value = true
         }
+    }
+
+    fun loadGroupMediaData(context: Context, group:LocalMediaGroup?){
+
     }
 }

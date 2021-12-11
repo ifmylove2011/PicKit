@@ -42,8 +42,8 @@ class PhotoAlbumFragment : Fragment() {
         return photoBinding!!.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         photoBinding.lifecycleOwner = this.viewLifecycleOwner
         photoBinding.rvAblum.apply {
             layoutManager = GridLayoutManager(this.context, 2)

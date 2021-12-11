@@ -51,6 +51,36 @@ data class LocalMediaGroup(
         return 0
     }
 
+    override fun toString(): String {
+        return "LocalMediaGroup(groupId=$groupId, name=$name, firstImagePath=$firstImagePath, firstMimeType=$firstMimeType, imageNum=$imageNum, selected=$selected)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as LocalMediaGroup
+
+        if (groupId != other.groupId) return false
+        if (name != other.name) return false
+        if (firstImagePath != other.firstImagePath) return false
+        if (firstMimeType != other.firstMimeType) return false
+        if (imageNum != other.imageNum) return false
+        if (selected != other.selected) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = groupId.hashCode()
+        result = 31 * result + (name?.hashCode() ?: 0)
+        result = 31 * result + (firstImagePath?.hashCode() ?: 0)
+        result = 31 * result + (firstMimeType?.hashCode() ?: 0)
+        result = 31 * result + imageNum
+        result = 31 * result + selected.hashCode()
+        return result
+    }
+
     companion object CREATOR : Parcelable.Creator<LocalMediaGroup> {
         override fun createFromParcel(parcel: Parcel): LocalMediaGroup {
             return LocalMediaGroup(parcel)
@@ -60,5 +90,6 @@ data class LocalMediaGroup(
             return arrayOfNulls(size)
         }
     }
+
 
 }

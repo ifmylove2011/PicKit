@@ -35,9 +35,8 @@ android {
             includeAndroidResources = true
         }
     }
-    dataBinding {
-        enabled = true
-        enabledForTests = true
+    buildFeatures {
+        dataBinding = true
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

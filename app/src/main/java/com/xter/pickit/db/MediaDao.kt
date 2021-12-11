@@ -1,10 +1,7 @@
 package com.xter.pickit.db
 
 import androidx.room.*
-import com.xter.pickit.entity.LocalMedia
-import com.xter.pickit.entity.LocalMediaFolder
-import com.xter.pickit.entity.LocalMediaGroup
-import com.xter.pickit.entity.MediaGroupWithData
+import com.xter.pickit.entity.*
 
 /**
  * @Author XTER
@@ -17,16 +14,19 @@ interface MediaDao {
     fun insertGroup(group: LocalMediaGroup): Long
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun updateGroup(group: LocalMediaGroup):Int
+    fun updateGroup(group: LocalMediaGroup): Int
 
     /**
      * TODO　并非单纯的删除分组，要考虑删除对应关系
      */
     @Delete
-    fun deleteGroup(group: LocalMediaGroup) :Int
+    fun deleteGroup(group: LocalMediaGroup): Int
+
+    @Delete
+    fun deleteGroups(groups: List<LocalMediaGroup>): Int
 
     @Query("SELECT * FROM `group`")
-    fun queryGroup():List<LocalMediaGroup>?
+    fun queryGroup(): List<LocalMediaGroup>?
 
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
     @Transaction
@@ -34,13 +34,13 @@ interface MediaDao {
     fun getGroupWithData(): List<MediaGroupWithData>
 
     @Insert
-    fun insertMediaData(data:LocalMedia)
+    fun insertMediaData(group: LocalMediaGroup, data: LocalMedia, ref: GroupDataCrossRef)
 
     /**
      * TODO　并非单纯的删除数据，要考虑删除对应关系
      */
     @Delete
-    fun deleteMediaData(data:LocalMedia)
+    fun deleteMediaData(group: LocalMediaGroup, data: LocalMedia): Int
 
 
 }
