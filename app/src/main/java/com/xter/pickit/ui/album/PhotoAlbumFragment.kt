@@ -13,6 +13,7 @@ import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
 import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
+import com.xter.pickit.ui.group.KEY_PICK
 import pub.devrel.easypermissions.EasyPermissions
 
 /**
@@ -37,6 +38,14 @@ class PhotoAlbumFragment : Fragment() {
         photoVM = ViewModelFactory.create(PhotoAlbumViewModel::class.java)
         photoBinding = FragmentPhotoAlbumBinding.inflate(inflater, container, false).apply {
             this.vm = photoVM
+        }
+        //因为要改变menu，所以要先于创建菜单前得到
+        arguments?.getBoolean(KEY_PICK)?.let { pick ->
+            if (pick) {
+                //要挑选图片
+                photoVM.pickMode.value = true
+                photoVM.choiceModeOpenForContent.value = true
+            }
         }
         setHasOptionsMenu(true)
         return photoBinding!!.root
@@ -67,12 +76,16 @@ class PhotoAlbumFragment : Fragment() {
             })
             adapter = photoFolderAdapter
         }
-        if (!EasyPermissions.hasPermissions(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (!EasyPermissions.hasPermissions(
+                requireContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        ) {
             return
         }
         photoVM.folderLoadCompleted.observe(viewLifecycleOwner,
             {
-                L.i("loaded = $it")
+                L.i("album loaded = $it")
                 if (it) {
                     photoFolderAdapter.submitList(photoVM.folders.value)
                     photoFolderAdapter.notifyDataSetChanged()
@@ -82,6 +95,31 @@ class PhotoAlbumFragment : Fragment() {
         if (photoVM.folders.value == null) {
             photoVM.loadMediaFolder(requireContext())
         }
+
+        photoVM.pickingNum.observe(viewLifecycleOwner, { num ->
+            L.i("picking num=$num")
+            (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
+                if (num > 0) {
+                    if (toolbar.title.toString().contains("(")) {
+                        toolbar.title = toolbar.title?.let {
+                            val title = it.substring(0, it.indexOf("("))
+                            L.i("title=$title")
+                            "$title($num)"
+                        }
+                    } else {
+                        toolbar.title = "${toolbar.title}($num)"
+                    }
+                } else {
+                    if (toolbar.title.toString().contains("(")) {
+                        toolbar.title = toolbar.title?.let {
+                            val title = it.substring(0, it.indexOf("("))
+                            title
+                        }
+                    }
+                }
+            }
+        })
+
     }
 
     fun createDetailFragment() {
@@ -93,11 +131,24 @@ class PhotoAlbumFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
+        if (photoVM.pickMode.value == true) {
+            inflater.inflate(R.menu.album_pick, menu)
+        } else {
+            inflater.inflate(R.menu.album, menu)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_sure->{
+                activity?.supportFragmentManager?.popBackStack()
+                true
+            }
+            R.id.action_cancel->{
+                activity?.supportFragmentManager?.popBackStack()
+                true
+            }
             R.id.action_layout_grid -> {
                 photoFolderAdapter.setItemStyle(ItemStyle.GRID)
                 true

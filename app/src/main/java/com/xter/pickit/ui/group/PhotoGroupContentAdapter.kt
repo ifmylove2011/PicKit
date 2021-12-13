@@ -1,37 +1,46 @@
-package com.xter.pickit.ui.album
+package com.xter.pickit.ui.group
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.xter.pickit.R
-import com.xter.pickit.databinding.ItemImageBinding
+import com.xter.pickit.databinding.ItemGroupImageBinding
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.ext.GlideApp
 import com.xter.pickit.kit.L
+import com.xter.pickit.ui.album.ContentDiffCallback
+import com.xter.pickit.ui.album.ContentStyle
+import com.xter.pickit.ui.album.ItemStyle
+import com.xter.pickit.ui.album.OnImageClickListener
 
 /**
  * @Author XTER
- * @Date 2021/11/29 14:57
+ * @Date 2021/12/11 15:10
  * @Description
  */
-class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
-    ListAdapter<LocalMedia, ContentViewHolder>(ContentDiffCallback()) {
+class PhotoGroupContentAdapter(private val VM: PhotoGroupViewModel) :
+    ListAdapter<LocalMedia, GroupContentViewHolder>(ContentDiffCallback()) {
 
-    private lateinit var onImageClickListener: OnImageClickListener
+    private lateinit var onGroupContentClickListener: OnGroupContentClickListener
 
     private var mStyle = ContentStyle.GRID
 
-    fun setItemClickListener(listener: OnImageClickListener) {
-        onImageClickListener = listener
-    }
+    /**
+     * 多选是否开启
+     */
+    private var choiceModeOpen = false
 
     fun setChoiceModeOpen(open: Boolean) {
-        VM.choiceModeOpenForContent.value = open
+        choiceModeOpen = open
+        notifyDataSetChanged()
+    }
+
+    fun setItemClickListener(listener: OnGroupContentClickListener) {
+        onGroupContentClickListener = listener
     }
 
     fun setContentStyle(style: ContentStyle) {
@@ -44,22 +53,12 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
         notifyDataSetChanged()
     }
 
-    fun getSelectedData(): List<LocalMedia> {
-        val result = mutableListOf<LocalMedia>()
-        for (data in currentList) {
-            if (data.isSelected) {
-                result.add(data)
-            }
-        }
-        return result
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupContentViewHolder {
+        return GroupContentViewHolder.from(parent)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentViewHolder {
-        return ContentViewHolder.from(parent)
-    }
-
-    override fun onBindViewHolder(holderContent: ContentViewHolder, position: Int) {
-        holderContent.apply {
+    override fun onBindViewHolder(groupContentFolder: GroupContentViewHolder, position: Int) {
+        groupContentFolder.apply {
             val data = getItem(position)
             bind(VM, data)
 
@@ -69,7 +68,7 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
                 VM.selectNum.value =
                     if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
             }
-            if (VM.choiceModeOpenForContent.value!!) {
+            if (choiceModeOpen) {
                 binding.cbSelected.visibility = View.VISIBLE
                 binding.cbSelected.isChecked = data.isSelected
             } else {
@@ -78,12 +77,12 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
 
             binding.root.let { view ->
                 view.setOnClickListener {
-                    if (VM.choiceModeOpenForContent.value!!) {
+                    if (choiceModeOpen) {
                         binding.cbSelected.isChecked = !binding.cbSelected.isChecked
                     } else {
-                        onImageClickListener.onItemClick(
-                            holderContent,
-                            holderContent.adapterPosition
+                        onGroupContentClickListener.onItemClick(
+                            groupContentFolder,
+                            groupContentFolder.adapterPosition
                         )
                     }
                 }
@@ -93,9 +92,9 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
                         data.isSelected = true
                         setChoiceModeOpen(true)
                     }
-                    onImageClickListener.onItemLongClick(
-                        holderContent,
-                        holderContent.adapterPosition
+                    onGroupContentClickListener.onItemLongClick(
+                        groupContentFolder,
+                        groupContentFolder.adapterPosition
                     )
                     true
                 }
@@ -107,57 +106,35 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
                 .centerCrop()
                 .placeholder(R.drawable.image_placeholder)
                 .error(R.mipmap.ic_error)
-                .into(holderContent.binding.ivAblumContent)
+                .into(groupContentFolder.binding.ivGroupContent)
         }
     }
-
-    override fun onCurrentListChanged(
-        previousList: MutableList<LocalMedia>,
-        currentList: MutableList<LocalMedia>
-    ) {
-        notifyDataSetChanged()
-    }
 }
 
-interface OnImageClickListener {
-    fun onItemClick(contentHolder: ContentViewHolder, position: Int)
-    fun onItemLongClick(contentHolder: ContentViewHolder, position: Int)
-}
-
-class ContentViewHolder private constructor(val binding: ItemImageBinding) :
+class GroupContentViewHolder private constructor(val binding: ItemGroupImageBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(vm: PhotoAlbumViewModel, item: LocalMedia) {
+    fun bind(vm: PhotoGroupViewModel, item: LocalMedia) {
         binding.apply {
-            this.photoVM = vm
+            this.photoGroupVM = vm
             this.mediaData = item
             this.executePendingBindings()
         }
     }
 
     companion object {
-        fun from(parent: ViewGroup): ContentViewHolder =
+        fun from(parent: ViewGroup): GroupContentViewHolder =
             parent.let {
                 val binding =
-                    ItemImageBinding.inflate(LayoutInflater.from(it.context), it, false)
-                ContentViewHolder(binding)
+                    ItemGroupImageBinding.inflate(LayoutInflater.from(it.context), it, false)
+                GroupContentViewHolder(binding)
             }
     }
 }
 
-class ContentDiffCallback : DiffUtil.ItemCallback<LocalMedia>() {
-    override fun areItemsTheSame(oldItem: LocalMedia, newItem: LocalMedia): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: LocalMedia, newItem: LocalMedia): Boolean {
-        return oldItem.equals(newItem)
-    }
-}
-
-enum class ContentStyle {
-    GRID,
-    LIST
+interface OnGroupContentClickListener {
+    fun onItemClick(groupContentFolder: GroupContentViewHolder, position: Int)
+    fun onItemLongClick(groupContentFolder: GroupContentViewHolder, position: Int)
 }
 
 //@BindingAdapter("items")

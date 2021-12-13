@@ -6,19 +6,16 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.xter.pickit.R
-import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
 import com.xter.pickit.databinding.FragmentPhotoGroupBinding
-import com.xter.pickit.entity.LocalMediaGroup
 import com.xter.pickit.ext.GROUP_KEY
 import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
 import com.xter.pickit.ui.album.ItemStyle
-import com.xter.pickit.ui.album.PhotoAlbumViewModel
 import java.lang.StringBuilder
-import java.util.*
 
 /**
  * 以分组为视图
@@ -52,23 +49,29 @@ class PhotoGroupFragment : Fragment() {
             }
             photoGroupAdapter.setItemClickListener(object : OnGroupClickListener {
                 override fun onItemClick(groupFolder: GroupViewHolder, position: Int) {
+                    val group = groupFolder.binding.group
+                    L.d(group.toString())
+                    val bundle = Bundle()
+                    bundle.putParcelable(KEY_GROUP, group)
+                    findNavController().navigate(R.id.action_nav_group_to_nav_group_content, bundle)
                 }
 
                 override fun onItemLongClick(groupFolder: GroupViewHolder, position: Int) {
+                    //已被adpater实现了前置功能
                 }
 
             })
             adapter = photoGroupAdapter
         }
+        //数据加载完成后，赋予adapter数据
         photoGroupVM.groupLoadCompleted.observe(viewLifecycleOwner, {
             if (it) {
+                L.i("groups load")
                 photoGroupAdapter.submitList(photoGroupVM.groups.value)
                 photoGroupAdapter.notifyDataSetChanged()
             }
         })
-//        photoGroupVM.choiceModeOpen.observe(viewLifecycleOwner,{
-//            photoGroupAdapter.notifyDataSetChanged()
-//        })
+        //选择数量，toolbar显示变化
         photoGroupVM.selectGroupNum.value = 0
         photoGroupVM.selectGroupNum.observe(viewLifecycleOwner, { selectNum ->
             L.i("select=$selectNum")
@@ -93,8 +96,31 @@ class PhotoGroupFragment : Fragment() {
                 }
             }
         })
+        //监听选择视图的显示与隐藏
+        photoGroupVM.choiceModeOpenForGroup.observe(viewLifecycleOwner, { open ->
+            photoGroupAdapter.notifyDataSetChanged()
+            if (!open) {
+                photoGroupVM.selectGroupNum.value = 0
+            }
+        })
+        //监听返回键
+        getView()?.apply {
+            isFocusableInTouchMode = true
+            setOnKeyListener(object : View.OnKeyListener {
+                override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
+                    if (keyCode == KeyEvent.KEYCODE_BACK && event?.action == KeyEvent.ACTION_UP && photoGroupVM.choiceModeOpenForGroup.value == true) {
+                        photoGroupVM.choiceModeOpenForGroup.value = false
+                        return true
+                    }
+                    return false
+                }
 
-        photoGroupVM.loadGroups()
+            })
+        }
+        //加载数据
+        if (photoGroupVM.groups.value == null) {
+            photoGroupVM.loadGroups()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -174,6 +200,8 @@ class PhotoGroupFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        photoGroupVM.choiceModeOpen.value = false
+        photoGroupVM.choiceModeOpenForGroup.value = false
     }
+
+
 }

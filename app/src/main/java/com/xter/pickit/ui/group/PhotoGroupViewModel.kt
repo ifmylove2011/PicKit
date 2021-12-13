@@ -5,12 +5,10 @@ import android.text.TextUtils
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.Room
 import com.xter.pickit.db.RoomDBM
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.entity.LocalMediaGroup
 import com.xter.pickit.kit.L
-import com.xter.pickit.ui.album.ContentStyle
 import kotlinx.coroutines.launch
 
 /**
@@ -20,7 +18,7 @@ import kotlinx.coroutines.launch
  */
 
 const val KEY_GROUP = "group"
-
+const val KEY_PICK = "pick"
 
 class PhotoGroupViewModel : ViewModel() {
 
@@ -29,7 +27,7 @@ class PhotoGroupViewModel : ViewModel() {
      */
     val groupLoadCompleted = MutableLiveData<Boolean>(false)
     val dataLoadCompleted = MutableLiveData<Boolean>(false)
-    val choiceModeOpen = MutableLiveData<Boolean>(false)
+    val choiceModeOpenForGroup = MutableLiveData<Boolean>(false)
 
     /**
      * 有图片的分组列表
@@ -39,6 +37,10 @@ class PhotoGroupViewModel : ViewModel() {
 
     val selectGroupNum:MutableLiveData<Int> = MutableLiveData(0)
     val selectNum:MutableLiveData<Int> = MutableLiveData(0)
+
+    val picking:MutableLiveData<LocalMediaGroup> = MutableLiveData(null)
+    val pickingGroupData:MutableLiveData<List<LocalMedia>> = MutableLiveData<List<LocalMedia>>()
+    val pickingNum:MutableLiveData<Int> = MutableLiveData(0)
 
     fun createNewGroup(groupName: String?) {
         viewModelScope.launch {
@@ -62,7 +64,7 @@ class PhotoGroupViewModel : ViewModel() {
                 if(rows>0){
                     L.i("删除group $rows")
                     selectGroupNum.value = 0
-                    choiceModeOpen.value = false
+                    choiceModeOpenForGroup.value = false
                     loadGroups()
                 }
             }

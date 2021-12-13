@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
@@ -107,6 +105,26 @@ class PhotoContentFragment : Fragment() {
                 }
             }
         })
+        photoVM.choiceModeOpenForContent.observe(viewLifecycleOwner, { open ->
+            photoContentAdapter.notifyDataSetChanged()
+            if (!open) {
+                photoVM.selectNum.value = 0
+            }
+        })
+        //监听返回键
+        getView()?.apply {
+            isFocusableInTouchMode = true
+            setOnKeyListener(object : View.OnKeyListener {
+                override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
+                    if (keyCode == KeyEvent.KEYCODE_BACK && event?.action == KeyEvent.ACTION_UP && photoVM.choiceModeOpenForContent.value == true) {
+                        photoVM.choiceModeOpenForContent.value = false
+                        return true
+                    }
+                    return false
+                }
+
+            })
+        }
     }
 
     fun showDetailFragment() {
@@ -119,11 +137,24 @@ class PhotoContentFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
-        inflater.inflate(R.menu.main_browser, menu)
+        if (photoVM.pickMode.value == true) {
+            inflater.inflate(R.menu.album_skim_pick, menu)
+        } else {
+            inflater.inflate(R.menu.album_skim, menu)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_sure->{
+                commitSelectedData()
+                activity?.supportFragmentManager?.popBackStack()
+                true
+            }
+            R.id.action_cancel->{
+                activity?.supportFragmentManager?.popBackStack()
+                true
+            }
             R.id.action_layout_grid -> {
                 photoContentAdapter.setContentStyle(ContentStyle.GRID)
                 true
@@ -134,6 +165,11 @@ class PhotoContentFragment : Fragment() {
             }
             else -> false
         }
+    }
+
+    fun commitSelectedData(){
+        val selectedData = photoContentAdapter.getSelectedData()
+
     }
 
     override fun onDestroyView() {

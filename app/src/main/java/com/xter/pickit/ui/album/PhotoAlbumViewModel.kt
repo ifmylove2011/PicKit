@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.lifecycle.*
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.entity.LocalMediaFolder
+import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
 import com.xter.pickit.media.IQueryResultListener
 import com.xter.pickit.media.LocalMediaLoader
+import com.xter.pickit.ui.group.KEY_GROUP
+import com.xter.pickit.ui.group.PhotoGroupViewModel
 import kotlinx.coroutines.launch
 
 const val KEY_FOLDER = "folder"
@@ -31,6 +34,19 @@ class PhotoAlbumViewModel : ViewModel() {
 
     val currentPos:MutableLiveData<Int> = MutableLiveData(0)
     val selectNum:MutableLiveData<Int> = MutableLiveData(0)
+
+    val choiceModeOpenForContent = MutableLiveData<Boolean>(false)
+
+    val pickMode:MutableLiveData<Boolean> = MutableLiveData(false)
+
+    val pickingNum:LiveData<Int> = pickMode.switchMap { open->
+        if(open){
+            val photoGroupVM = ViewModelFactory.create(KEY_GROUP,PhotoGroupViewModel::class.java)
+            photoGroupVM.pickingNum
+        }else{
+            MutableLiveData(0)
+        }
+    }
 
     fun changePos(pos:Int){
         viewModelScope.launch {

@@ -43,7 +43,15 @@
         android:id="@+id/nav_group_content"
         android:name="com.xter.pickit.ui.group.PhotoGroupContentFragment"
         android:label="@string/menu_brower"
-        tools:layout="@layout/fragment_photo_group_content" />
+        tools:layout="@layout/fragment_photo_group_content">
+        <action
+            android:id="@+id/action_nav_group_content_to_nav_ablum"
+            app:destination="@id/nav_ablum"
+            app:enterAnim="@anim/anim_fade_in"
+            app:exitAnim="@anim/anim_fade_out"
+            app:popEnterAnim="@anim/anim_fade_in"
+            app:popExitAnim="@anim/anim_fade_out" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_settings"

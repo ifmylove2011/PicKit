@@ -27,8 +27,7 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
     private var mStyle = ItemStyle.DEFAULT
 
     fun setChoiceModeOpen(open: Boolean) {
-        VM.choiceModeOpen.value = open
-        notifyDataSetChanged()
+        VM.choiceModeOpenForGroup.value = open
     }
 
     fun setItemClickListener(listener: OnGroupClickListener) {
@@ -61,16 +60,14 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
 
             //先放监听，以确定数据选中状态与数量
             binding.cbSelected.setOnCheckedChangeListener { _, isChecked ->
-                L.w("pos=${groupFolder.adapterPosition},isChecked=$isChecked,group=$group")
                 group.selected = isChecked
                 VM.selectGroupNum.value =
                     if (isChecked) VM.selectGroupNum.value?.plus(1) else VM.selectGroupNum.value?.minus(
                         1
                     )
             }
-            if (VM.choiceModeOpen.value!!) {
+            if (VM.choiceModeOpenForGroup.value!!) {
                 binding.cbSelected.visibility = View.VISIBLE
-                L.i("---------")
                 binding.cbSelected.isChecked = group.selected
             } else {
                 binding.cbSelected.visibility = View.GONE
@@ -78,7 +75,7 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
 
             binding.root.let { view ->
                 view.setOnClickListener {
-                    if (VM.choiceModeOpen.value!!) {
+                    if (VM.choiceModeOpenForGroup.value!!) {
                         binding.cbSelected.isChecked = !binding.cbSelected.isChecked
                     } else {
                         onGroupClickListener.onItemClick(groupFolder, groupFolder.adapterPosition)
@@ -86,10 +83,8 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
                 }
                 view.setOnLongClickListener {
                     //进入多选状态
-                    //TODO 刷新后再进多选有问题
                     if (binding.cbSelected.visibility == View.GONE) {
                         group.selected = true
-                        L.w("pos=${groupFolder.adapterPosition},isChecked=${binding.cbSelected.isChecked},group=$group")
                         setChoiceModeOpen(true)
                     }
                     onGroupClickListener.onItemLongClick(groupFolder, groupFolder.adapterPosition)
@@ -124,6 +119,13 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
         }
     }
 
+    override fun onCurrentListChanged(
+        previousList: MutableList<LocalMediaGroup>,
+        currentList: MutableList<LocalMediaGroup>
+    ) {
+        L.i("数据有变动")
+        notifyDataSetChanged()
+    }
 }
 
 class GroupViewHolder private constructor(val binding: ItemGroupCoverBinding) :
@@ -158,7 +160,7 @@ class GroupDiffCallback : DiffUtil.ItemCallback<LocalMediaGroup>() {
     }
 
     override fun areContentsTheSame(oldItem: LocalMediaGroup, newItem: LocalMediaGroup): Boolean {
-        return oldItem.equals(newItem)
+        return oldItem == newItem
     }
 }
 
