@@ -3,6 +3,7 @@ package com.xter.pickit.ext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.xter.pickit.ui.album.PhotoAlbumViewModel
+import com.xter.pickit.ui.album.PhotoDetailViewModel
 import com.xter.pickit.ui.group.PhotoGroupViewModel
 
 
@@ -12,12 +13,19 @@ import com.xter.pickit.ui.group.PhotoGroupViewModel
  * @Description
  */
 const val DEFAULT_KEY = "APPLICATION"
-const val FOLDER_KEY = "FOLDER"
-const val GROUP_KEY = "GROUP"
+const val KEY_FOLDER = "FOLDER"
+const val KEY_GROUP = "GROUP"
+const val KEY_DETAIL = "DETAIL"
+
+const val KEY_PICK = "pick"
+const val KEY_MEDIA_DATA = "mediaData"
+const val KEY_MEDIA_DATA_POS = "mediaDataPos"
+
+const val TAG_DETAIL = "detail"
 
 object ViewModelFactory : ViewModelProvider.Factory {
 
-    val vmMap = HashMap<String, ViewModel?>()
+    private val vmMap = HashMap<String, ViewModel?>()
 
     fun <T : ViewModel?> create(
         key: String,
@@ -29,6 +37,7 @@ object ViewModelFactory : ViewModelProvider.Factory {
                 when {
                     it.isAssignableFrom(PhotoAlbumViewModel::class.java) -> PhotoAlbumViewModel()
                     it.isAssignableFrom(PhotoGroupViewModel::class.java) -> PhotoGroupViewModel()
+                    it.isAssignableFrom(PhotoDetailViewModel::class.java) -> PhotoDetailViewModel()
                     else ->
                         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }

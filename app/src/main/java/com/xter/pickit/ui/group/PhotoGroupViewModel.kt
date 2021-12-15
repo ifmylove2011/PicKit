@@ -1,6 +1,5 @@
 package com.xter.pickit.ui.group
 
-import android.content.Context
 import android.text.TextUtils
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,9 +16,6 @@ import kotlinx.coroutines.launch
  * @Description
  */
 
-const val KEY_GROUP = "group"
-const val KEY_PICK = "pick"
-
 class PhotoGroupViewModel : ViewModel() {
 
     /**
@@ -28,6 +24,7 @@ class PhotoGroupViewModel : ViewModel() {
     val groupLoadCompleted = MutableLiveData<Boolean>(false)
     val dataLoadCompleted = MutableLiveData<Boolean>(false)
     val choiceModeOpenForGroup = MutableLiveData<Boolean>(false)
+    val choiceModeOpenForContent = MutableLiveData<Boolean>(false)
 
     /**
      * 有图片的分组列表
@@ -35,12 +32,13 @@ class PhotoGroupViewModel : ViewModel() {
     val groups: MutableLiveData<List<LocalMediaGroup>> = MutableLiveData<List<LocalMediaGroup>>()
     val images: MutableLiveData<List<LocalMedia>> = MutableLiveData<List<LocalMedia>>()
 
-    val selectGroupNum:MutableLiveData<Int> = MutableLiveData(0)
-    val selectNum:MutableLiveData<Int> = MutableLiveData(0)
+    val selectGroupNum: MutableLiveData<Int> = MutableLiveData(0)
+    val selectNum: MutableLiveData<Int> = MutableLiveData(0)
 
-    val picking:MutableLiveData<LocalMediaGroup> = MutableLiveData(null)
-    val pickingGroupData:MutableLiveData<List<LocalMedia>> = MutableLiveData<List<LocalMedia>>()
-    val pickingNum:MutableLiveData<Int> = MutableLiveData(0)
+    val currentGroup: MutableLiveData<LocalMediaGroup> = MutableLiveData(null)
+    val pickingGroupData: MutableLiveData<HashSet<LocalMedia>> =
+        MutableLiveData<HashSet<LocalMedia>>(HashSet())
+    val pickingNum: MutableLiveData<Int> = MutableLiveData(pickingGroupData.value?.size)
 
     fun createNewGroup(groupName: String?) {
         viewModelScope.launch {
@@ -58,10 +56,10 @@ class PhotoGroupViewModel : ViewModel() {
         }
     }
 
-    fun deleteGroups(groups:List<LocalMediaGroup>){
+    fun deleteGroups(groups: List<LocalMediaGroup>) {
         viewModelScope.launch {
-            RoomDBM.get().deleteGroups(groups)?.let { rows->
-                if(rows>0){
+            RoomDBM.get().deleteGroups(groups)?.let { rows ->
+                if (rows > 0) {
                     L.i("删除group $rows")
                     selectGroupNum.value = 0
                     choiceModeOpenForGroup.value = false
@@ -81,7 +79,27 @@ class PhotoGroupViewModel : ViewModel() {
         }
     }
 
-    fun loadGroupMediaData(context: Context, group:LocalMediaGroup?){
+    fun loadGroupMediaData(group: LocalMediaGroup?) {
+        viewModelScope.launch {
+            dataLoadCompleted.value = false
+            group?.let {
+                RoomDBM.get().getGroupWithData(it.groupId)?.let { result ->
+                    images.value = result.mediaData
+                    //如果group.imageNum不符合，就更新一下
+                    if (group.imageNum != result.mediaData.size) {
+                        group.imageNum = result.mediaData.size
+                        RoomDBM.get().updateGroup(group)
+                    }
+                }
+            }
+            dataLoadCompleted.value = true
+        }
+    }
 
+    fun saveSelectedData() {
+        viewModelScope.launch {
+            RoomDBM.get()
+                .saveMediaDataWithCrossRef(currentGroup.value!!, pickingGroupData.value!!.toList())
+        }
     }
 }

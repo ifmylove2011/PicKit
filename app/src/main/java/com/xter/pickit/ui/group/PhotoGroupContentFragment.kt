@@ -9,12 +9,11 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoGroupContentBinding
+import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.entity.LocalMediaGroup
-import com.xter.pickit.ext.GROUP_KEY
-import com.xter.pickit.ext.ViewModelFactory
+import com.xter.pickit.ext.*
 import com.xter.pickit.kit.L
 import com.xter.pickit.ui.album.ContentStyle
-import com.xter.pickit.ui.album.KEY_MEDIA_DATA_POS
 import com.xter.pickit.ui.album.PhotoDetailActivity
 
 /**
@@ -35,7 +34,7 @@ class PhotoGroupContentFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        photoGroupVM = ViewModelFactory.create(GROUP_KEY, PhotoGroupViewModel::class.java)
+        photoGroupVM = ViewModelFactory.create(KEY_GROUP, PhotoGroupViewModel::class.java)
         photoBinding = FragmentPhotoGroupContentBinding.inflate(inflater, container, false).apply {
             this.vm = photoGroupVM
         }
@@ -61,6 +60,7 @@ class PhotoGroupContentFragment : Fragment() {
                     val mediaData = groupContentFolder.binding.mediaData
                     L.i(mediaData.toString())
                     Intent(requireActivity(), PhotoDetailActivity::class.java).let { intent ->
+                        intent.putParcelableArrayListExtra(KEY_MEDIA_DATA, photoGroupVM.images.value as ArrayList<LocalMedia>)
                         intent.putExtra(KEY_MEDIA_DATA_POS, position)
                         startActivity(intent)
                     }
@@ -70,7 +70,7 @@ class PhotoGroupContentFragment : Fragment() {
                     groupContentFolder: GroupContentViewHolder,
                     position: Int
                 ) {
-                    //长按选中，并进入多选状态
+                    //长按选中，并进入多选状态，已被adapter前置实现
                 }
 
             })
@@ -78,7 +78,7 @@ class PhotoGroupContentFragment : Fragment() {
         }
         photoGroupVM.dataLoadCompleted.observe(viewLifecycleOwner,
             {
-                L.i("loaded = $it")
+                L.i("group content loaded = $it")
                 if (it) {
                     photoContentAdapter.submitList(photoGroupVM.images.value)
                     photoContentAdapter.notifyDataSetChanged()
@@ -88,19 +88,17 @@ class PhotoGroupContentFragment : Fragment() {
             (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
                 toolbar.title = group.name
             }
-            photoGroupVM.picking.value = group
-            photoGroupVM.loadGroupMediaData(requireContext(), group)
+            photoGroupVM.currentGroup.value = group
+            photoGroupVM.loadGroupMediaData(group)
         }
 
         photoGroupVM.selectNum.value = 0
         photoGroupVM.selectNum.observe(viewLifecycleOwner, { selectNum ->
-            L.i("select=$selectNum")
             (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
                 if (selectNum > 0) {
                     if (toolbar.title.toString().contains("(")) {
                         toolbar.title = toolbar.title?.let {
                             val title = it.substring(0, it.indexOf("("))
-                            L.i("title=$title")
                             "$title($selectNum)"
                         }
                     } else {
@@ -116,6 +114,35 @@ class PhotoGroupContentFragment : Fragment() {
                 }
             }
         })
+
+        //监听选择视图的显示与隐藏
+        photoGroupVM.choiceModeOpenForContent.observe(viewLifecycleOwner, { open ->
+            photoContentAdapter.notifyDataSetChanged()
+            if (!open) {
+                photoGroupVM.selectNum.value = 0
+            }
+        })
+
+//        photoGroupVM.pickingGroupData.observe(viewLifecycleOwner, { data ->
+//            L.i("pick result = ${data.size}")
+//            photoContentAdapter.submitList(data.toList())
+//            photoContentAdapter.notifyDataSetChanged()
+//        })
+
+        //监听返回键
+        getView()?.apply {
+            isFocusableInTouchMode = true
+            setOnKeyListener(object : View.OnKeyListener {
+                override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
+                    if (keyCode == KeyEvent.KEYCODE_BACK && event?.action == KeyEvent.ACTION_UP && photoGroupVM.choiceModeOpenForContent.value == true) {
+                        photoGroupVM.choiceModeOpenForContent.value = false
+                        return true
+                    }
+                    return false
+                }
+
+            })
+        }
     }
 
 
@@ -152,4 +179,9 @@ class PhotoGroupContentFragment : Fragment() {
         view?.findNavController()?.navigate(R.id.action_nav_group_content_to_nav_ablum, bundle)
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        photoGroupVM.pickingGroupData.value?.clear()
+    }
 }

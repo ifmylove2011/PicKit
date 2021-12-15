@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
+import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.entity.LocalMediaFolder
-import com.xter.pickit.ext.ViewModelFactory
+import com.xter.pickit.ext.*
 import com.xter.pickit.kit.L
 
 /**
@@ -54,6 +56,7 @@ class PhotoContentFragment : Fragment() {
                     val mediaData = contentHolder.binding.mediaData
                     L.i(mediaData.toString())
                     Intent(requireActivity(), PhotoDetailActivity::class.java).let { intent ->
+                        intent.putParcelableArrayListExtra(KEY_MEDIA_DATA, photoVM.images.value as ArrayList<LocalMedia>)
                         intent.putExtra(KEY_MEDIA_DATA_POS, position)
                         startActivity(intent)
                     }
@@ -66,6 +69,7 @@ class PhotoContentFragment : Fragment() {
             })
             adapter = photoContentAdapter
         }
+        //监听数据是否加载完成
         photoVM.contentLoadCompleted.observe(viewLifecycleOwner,
             {
                 L.i("loaded = $it")
@@ -74,22 +78,21 @@ class PhotoContentFragment : Fragment() {
                     photoContentAdapter.notifyDataSetChanged()
                 }
             })
+        //从上个界面得到folder，并查询folder下数据
         arguments?.getParcelable<LocalMediaFolder>(KEY_FOLDER)?.let { folder ->
             (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
                 toolbar.title = folder.name
             }
             photoVM.loadMediaData(requireContext(), folder)
         }
-
+        //监听选择数量，改变toolbar显示
         photoVM.selectNum.value = 0
         photoVM.selectNum.observe(viewLifecycleOwner, { selectNum ->
-            L.i("select=$selectNum")
             (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
                 if (selectNum > 0) {
                     if (toolbar.title.toString().contains("(")) {
                         toolbar.title = toolbar.title?.let {
                             val title = it.substring(0, it.indexOf("("))
-                            L.i("title=$title")
                             "$title($selectNum)"
                         }
                     } else {
@@ -105,6 +108,7 @@ class PhotoContentFragment : Fragment() {
                 }
             }
         })
+        //监听多选模式的开启与关闭
         photoVM.choiceModeOpenForContent.observe(viewLifecycleOwner, { open ->
             photoContentAdapter.notifyDataSetChanged()
             if (!open) {
@@ -127,14 +131,6 @@ class PhotoContentFragment : Fragment() {
         }
     }
 
-    fun showDetailFragment() {
-        fragmentManager?.let { fm ->
-            fm.beginTransaction()?.let { ft ->
-                fm.findFragmentByTag(TAG_DETAIL)?.let { ft.show(it) }
-            }
-        }
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
         if (photoVM.pickMode.value == true) {
@@ -148,13 +144,13 @@ class PhotoContentFragment : Fragment() {
         return when (item.itemId) {
             R.id.action_sure->{
                 commitSelectedData()
-                activity?.supportFragmentManager?.popBackStack()
+                findNavController().popBackStack()
                 true
             }
-            R.id.action_cancel->{
-                activity?.supportFragmentManager?.popBackStack()
-                true
-            }
+//            R.id.action_cancel->{
+//                findNavController().popBackStack()
+//                true
+//            }
             R.id.action_layout_grid -> {
                 photoContentAdapter.setContentStyle(ContentStyle.GRID)
                 true
@@ -169,7 +165,9 @@ class PhotoContentFragment : Fragment() {
 
     fun commitSelectedData(){
         val selectedData = photoContentAdapter.getSelectedData()
-
+        L.i("selected size=${selectedData.size}")
+        photoVM.commitData(selectedData)
+        photoContentAdapter.clearSelectedState()
     }
 
     override fun onDestroyView() {

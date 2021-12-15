@@ -11,11 +11,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoGroupBinding
-import com.xter.pickit.ext.GROUP_KEY
+import com.xter.pickit.ext.KEY_GROUP
 import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
 import com.xter.pickit.ui.album.ItemStyle
-import java.lang.StringBuilder
 
 /**
  * 以分组为视图
@@ -31,7 +30,7 @@ class PhotoGroupFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        photoGroupVM = ViewModelFactory.create(GROUP_KEY, PhotoGroupViewModel::class.java)
+        photoGroupVM = ViewModelFactory.create(KEY_GROUP, PhotoGroupViewModel::class.java)
         photoGroupBinding = FragmentPhotoGroupBinding.inflate(inflater, container, false).apply {
             this.vm = photoGroupVM
         }
@@ -50,14 +49,13 @@ class PhotoGroupFragment : Fragment() {
             photoGroupAdapter.setItemClickListener(object : OnGroupClickListener {
                 override fun onItemClick(groupFolder: GroupViewHolder, position: Int) {
                     val group = groupFolder.binding.group
-                    L.d(group.toString())
                     val bundle = Bundle()
                     bundle.putParcelable(KEY_GROUP, group)
                     findNavController().navigate(R.id.action_nav_group_to_nav_group_content, bundle)
                 }
 
                 override fun onItemLongClick(groupFolder: GroupViewHolder, position: Int) {
-                    //已被adpater实现了前置功能
+                    //进入多选状态，已被adpater实现了前置功能
                 }
 
             })
@@ -74,13 +72,11 @@ class PhotoGroupFragment : Fragment() {
         //选择数量，toolbar显示变化
         photoGroupVM.selectGroupNum.value = 0
         photoGroupVM.selectGroupNum.observe(viewLifecycleOwner, { selectNum ->
-            L.i("select=$selectNum")
             (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
                 if (selectNum > 0) {
                     if (toolbar.title.toString().contains("(")) {
                         toolbar.title = toolbar.title?.let {
                             val title = it.substring(0, it.indexOf("("))
-                            L.i("title=$title")
                             "$title($selectNum)"
                         }
                     } else {

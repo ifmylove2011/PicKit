@@ -13,6 +13,9 @@ import com.xter.pickit.R
 import com.xter.pickit.databinding.ActivityDetailBinding
 import com.xter.pickit.databinding.DialogDetail1Binding
 import com.xter.pickit.entity.LocalMedia
+import com.xter.pickit.ext.KEY_DETAIL
+import com.xter.pickit.ext.KEY_MEDIA_DATA
+import com.xter.pickit.ext.KEY_MEDIA_DATA_POS
 import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
 
@@ -20,15 +23,15 @@ import com.xter.pickit.kit.L
 class PhotoDetailActivity : AppCompatActivity() {
 
     private lateinit var detailBinding: ActivityDetailBinding
-    private lateinit var photoVM: PhotoAlbumViewModel
+    private lateinit var photoDetailVM: PhotoDetailViewModel
     private lateinit var photoDetailAdapter: PhotoDetailAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         detailBinding = ActivityDetailBinding.inflate(layoutInflater)
-        photoVM = ViewModelFactory.create(PhotoAlbumViewModel::class.java)
-        detailBinding.vm = photoVM
+        photoDetailVM = ViewModelFactory.create(KEY_DETAIL, PhotoDetailViewModel::class.java)
+        detailBinding.vm = photoDetailVM
         setContentView(detailBinding.root)
 
         setSupportActionBar(detailBinding.toolbar)
@@ -45,16 +48,14 @@ class PhotoDetailActivity : AppCompatActivity() {
         //初始化vp
         detailBinding.vpImageDetail.apply {
             //初始化adapter
-            detailBinding.vm?.let { VM ->
-                photoDetailAdapter = PhotoDetailAdapter(VM)
-            }
+            photoDetailAdapter = PhotoDetailAdapter()
             //加ViewPagers滑动监听
             this.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     supportActionBar?.let { toolbar ->
-                        photoVM.currentPos.value = position
-                        toolbar.title = photoVM.images.value?.get(position)?.name
-                        toolbar.subtitle = "${position + 1}/${photoVM.images.value?.size}"
+                        photoDetailVM.currentPos.value = position
+                        toolbar.title = photoDetailVM.images.value?.get(position)?.name
+                        toolbar.subtitle = "${position + 1}/${photoDetailVM.images.value?.size}"
                     }
                 }
             })
@@ -75,14 +76,18 @@ class PhotoDetailActivity : AppCompatActivity() {
             adapter = photoDetailAdapter
         }
 
-        //初始化数据，因VM复用，在这里已经有数据
-        photoDetailAdapter.submitList(photoVM.images.value)
-        photoDetailAdapter.notifyDataSetChanged()
+        //初始化数据
+        intent?.getParcelableArrayListExtra<LocalMedia>(KEY_MEDIA_DATA)?.let { data ->
+            photoDetailVM.images.value = data
+            photoDetailAdapter.submitList(photoDetailVM.images.value)
+            photoDetailAdapter.notifyDataSetChanged()
+        }
+
 
         //根据索引跳到某一个图片
         intent?.getIntExtra(KEY_MEDIA_DATA_POS, 0)?.let { pos ->
             detailBinding.vpImageDetail.setCurrentItem(pos, false)
-            detailBinding.toolbar.subtitle = "${pos + 1}/${photoVM.images.value?.size}"
+            detailBinding.toolbar.subtitle = "${pos + 1}/${photoDetailVM.images.value?.size}"
         }
 
         detailBinding.toolbar.apply {
@@ -126,7 +131,7 @@ class PhotoDetailActivity : AppCompatActivity() {
             this.executePendingBindings()
         }
         AlertDialog.Builder(this)
-            .setTitle("${photoVM.currentPos.value?.plus(1)}/${photoVM.images.value?.size}")
+            .setTitle("${photoDetailVM.currentPos.value?.plus(1)}/${photoDetailVM.images.value?.size}")
             .setView(view)
             .setCancelable(false)
             .setPositiveButton(

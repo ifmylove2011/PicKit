@@ -16,7 +16,7 @@ import com.xter.pickit.ext.GlideApp
  * @Date 2021/11/29 14:57
  * @Description
  */
-class PhotoDetailAdapter(private val VM: PhotoAlbumViewModel) :
+class PhotoDetailAdapter :
     ListAdapter<LocalMedia, DetailViewHolder>(DetailDiffCallback()) {
 
     private lateinit var onImageDetailClickListener: OnImageDetailClickListener
@@ -34,23 +34,14 @@ class PhotoDetailAdapter(private val VM: PhotoAlbumViewModel) :
     override fun onBindViewHolder(detailViewHolder: DetailViewHolder, position: Int) {
         detailViewHolder.apply {
             val data = getItem(position)
-            bind(VM, data)
-//            detailViewHolder.binding.ivImageDetail.apply {
-//                enable()
-//                setOnClickListener{
-//                    onImageDetailClickListener.onItemClick(detailViewHolder, detailViewHolder.adapterPosition)
-//                }
-//                setOnLongClickListener {
-//                    onImageDetailClickListener.onItemLongClick(
-//                        detailViewHolder,
-//                        detailViewHolder.adapterPosition
-//                    )
-//                    true
-//                }
-//            }
-            itemView.let { view ->
+            bind(data)
+
+            binding.root.let { view ->
                 view.setOnClickListener {
-                    onImageDetailClickListener.onItemClick(detailViewHolder, detailViewHolder.adapterPosition)
+                    onImageDetailClickListener.onItemClick(
+                        detailViewHolder,
+                        detailViewHolder.adapterPosition
+                    )
                 }
                 view.setOnLongClickListener {
                     onImageDetailClickListener.onItemLongClick(
@@ -80,9 +71,8 @@ interface OnImageDetailClickListener {
 class DetailViewHolder private constructor(val binding: ItemImageDetailBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(vm: PhotoAlbumViewModel, item: LocalMedia) {
+    fun bind(item: LocalMedia) {
         binding.apply {
-            this.photoVM = vm
             this.mediaData = item
             this.executePendingBindings()
         }
@@ -104,6 +94,6 @@ class DetailDiffCallback : DiffUtil.ItemCallback<LocalMedia>() {
     }
 
     override fun areContentsTheSame(oldItem: LocalMedia, newItem: LocalMedia): Boolean {
-        return oldItem.equals(newItem)
+        return oldItem == newItem
     }
 }

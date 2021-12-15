@@ -32,11 +32,6 @@ data class LocalMedia(
     @ColumnInfo(name = "date_modified") var dateModifiedTime: Long
 ) : Parcelable {
 
-    /**
-     * 新添加的分组ID
-     */
-    @ColumnInfo(name = "group_id") var groupId: Long = 0
-
     @Ignore
     var originalPath: String? = null
 
@@ -59,6 +54,29 @@ data class LocalMedia(
     @Ignore
     var isLongImage = false
 
+    constructor(parcel: Parcel) : this(
+        parcel.readLong(),
+        parcel.readLong(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readLong(),
+        parcel.readString(),
+        parcel.readInt(),
+        parcel.readInt(),
+        parcel.readLong(),
+        parcel.readLong(),
+        parcel.readLong()
+    ) {
+        originalPath = parcel.readString()
+        androidQToPath = parcel.readString()
+        isSelected = parcel.readByte() != 0.toByte()
+        position = parcel.readInt()
+        orientation = parcel.readInt()
+        isLongImage = parcel.readByte() != 0.toByte()
+    }
+
     fun getFormatSize(): String {
         if (size / (1024 * 1024) > 1) {
             return String.format("%.2fMb", size.toFloat() / (1024 * 1024))
@@ -77,30 +95,6 @@ data class LocalMedia(
         return DateTimeUtils.getNormalDate1(dateModifiedTime * 1000)
     }
 
-    constructor(parcel: Parcel) : this(
-        parcel.readLong(),
-        parcel.readLong(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readString(),
-        parcel.readLong(),
-        parcel.readString(),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readLong(),
-        parcel.readLong(),
-        parcel.readLong()
-    ) {
-        groupId = parcel.readLong()
-        originalPath = parcel.readString()
-        androidQToPath = parcel.readString()
-        isSelected = parcel.readByte() != 0.toByte()
-        position = parcel.readInt()
-        orientation = parcel.readInt()
-        isLongImage = parcel.readByte() != 0.toByte()
-    }
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeLong(id)
         parcel.writeLong(bucketId)
@@ -115,7 +109,6 @@ data class LocalMedia(
         parcel.writeLong(size)
         parcel.writeLong(dateAddedTime)
         parcel.writeLong(dateModifiedTime)
-        parcel.writeLong(groupId)
         parcel.writeString(originalPath)
         parcel.writeString(androidQToPath)
         parcel.writeByte(if (isSelected) 1 else 0)
@@ -137,5 +130,6 @@ data class LocalMedia(
             return arrayOfNulls(size)
         }
     }
+
 
 }

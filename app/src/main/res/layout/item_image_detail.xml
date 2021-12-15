@@ -9,9 +9,6 @@
             name="MediaData"
             type="com.xter.pickit.entity.LocalMedia" />
 
-        <variable
-            name="photoVM"
-            type="com.xter.pickit.ui.album.PhotoAlbumViewModel" />
     </data>
 
 

@@ -29,14 +29,8 @@ class PhotoGroupContentAdapter(private val VM: PhotoGroupViewModel) :
 
     private var mStyle = ContentStyle.GRID
 
-    /**
-     * 多选是否开启
-     */
-    private var choiceModeOpen = false
-
     fun setChoiceModeOpen(open: Boolean) {
-        choiceModeOpen = open
-        notifyDataSetChanged()
+        VM.choiceModeOpenForContent.value = open
     }
 
     fun setItemClickListener(listener: OnGroupContentClickListener) {
@@ -68,7 +62,7 @@ class PhotoGroupContentAdapter(private val VM: PhotoGroupViewModel) :
                 VM.selectNum.value =
                     if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
             }
-            if (choiceModeOpen) {
+            if (VM.choiceModeOpenForContent.value!!) {
                 binding.cbSelected.visibility = View.VISIBLE
                 binding.cbSelected.isChecked = data.isSelected
             } else {
@@ -77,7 +71,7 @@ class PhotoGroupContentAdapter(private val VM: PhotoGroupViewModel) :
 
             binding.root.let { view ->
                 view.setOnClickListener {
-                    if (choiceModeOpen) {
+                    if (VM.choiceModeOpenForContent.value!!) {
                         binding.cbSelected.isChecked = !binding.cbSelected.isChecked
                     } else {
                         onGroupContentClickListener.onItemClick(
@@ -89,7 +83,7 @@ class PhotoGroupContentAdapter(private val VM: PhotoGroupViewModel) :
                 view.setOnLongClickListener {
                     //进入多选状态
                     if (binding.cbSelected.visibility == View.GONE) {
-                        data.isSelected = true
+                        binding.cbSelected.isChecked = !binding.cbSelected.isChecked
                         setChoiceModeOpen(true)
                     }
                     onGroupContentClickListener.onItemLongClick(
@@ -136,8 +130,3 @@ interface OnGroupContentClickListener {
     fun onItemClick(groupContentFolder: GroupContentViewHolder, position: Int)
     fun onItemLongClick(groupContentFolder: GroupContentViewHolder, position: Int)
 }
-
-//@BindingAdapter("items")
-//fun setItems(recyclerView: RecyclerView, items: List<LocalMediaFolder>) {
-//    (recyclerView.adapter as PhotoAdapter).submitList(items)
-//}

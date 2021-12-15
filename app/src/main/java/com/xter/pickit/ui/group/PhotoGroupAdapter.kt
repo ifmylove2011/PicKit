@@ -123,7 +123,7 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
         previousList: MutableList<LocalMediaGroup>,
         currentList: MutableList<LocalMediaGroup>
     ) {
-        L.i("数据有变动")
+        L.i("group data changed")
         notifyDataSetChanged()
     }
 }

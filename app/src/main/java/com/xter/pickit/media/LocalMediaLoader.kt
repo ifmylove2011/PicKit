@@ -189,7 +189,7 @@ class LocalMediaLoader {
             if (PlatformUtil.isR()) null else ORDER_BY
         )?.let { cursor ->
             val count: Int = cursor.count
-            L.i("查询结果数量 count=$count")
+            L.i("查询结果 目录数量 count=$count")
             var totalCount = 0
             val mediaFolders: MutableList<LocalMediaFolder> = ArrayList<LocalMediaFolder>()
             if (count > 0) {

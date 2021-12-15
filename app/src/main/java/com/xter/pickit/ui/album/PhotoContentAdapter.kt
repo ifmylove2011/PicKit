@@ -54,6 +54,15 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
         return result
     }
 
+    fun clearSelectedState(){
+        for (data in currentList) {
+            if (data.isSelected) {
+                data.isSelected = false
+            }
+        }
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentViewHolder {
         return ContentViewHolder.from(parent)
     }
@@ -65,9 +74,11 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
 
             //先放监听，以确定数据选中状态与数量
             binding.cbSelected.setOnCheckedChangeListener { _, isChecked ->
+                if (data.isSelected xor isChecked) {
+                    VM.selectNum.value =
+                        if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
+                }
                 data.isSelected = isChecked
-                VM.selectNum.value =
-                    if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
             }
             if (VM.choiceModeOpenForContent.value!!) {
                 binding.cbSelected.visibility = View.VISIBLE
@@ -90,7 +101,7 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
                 view.setOnLongClickListener {
                     //进入多选状态
                     if (binding.cbSelected.visibility == View.GONE) {
-                        data.isSelected = true
+                        binding.cbSelected.isChecked = !binding.cbSelected.isChecked
                         setChoiceModeOpen(true)
                     }
                     onImageClickListener.onItemLongClick(
@@ -151,7 +162,7 @@ class ContentDiffCallback : DiffUtil.ItemCallback<LocalMedia>() {
     }
 
     override fun areContentsTheSame(oldItem: LocalMedia, newItem: LocalMedia): Boolean {
-        return oldItem.equals(newItem)
+        return oldItem == newItem
     }
 }
 

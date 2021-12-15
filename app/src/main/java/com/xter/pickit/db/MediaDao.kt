@@ -10,6 +10,9 @@ import com.xter.pickit.entity.*
  */
 @Dao
 interface MediaDao {
+
+    /*------------  LocalMediaGroup ------------*/
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertGroup(group: LocalMediaGroup): Long
 
@@ -28,19 +31,49 @@ interface MediaDao {
     @Query("SELECT * FROM `group`")
     fun queryGroup(): List<LocalMediaGroup>?
 
+    /*------------  MediaGroupWithData ------------*/
+
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
     @Transaction
     @Query("SELECT * FROM `group`")
     fun getGroupWithData(): List<MediaGroupWithData>
 
-    @Insert
-    fun insertMediaData(group: LocalMediaGroup, data: LocalMedia, ref: GroupDataCrossRef)
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
+    @Transaction
+    @Query("SELECT * FROM `group` WHERE group_id = :groupId")
+    fun getGroupWithData(groupId: Long): MediaGroupWithData
 
-    /**
-     * TODO　并非单纯的删除数据，要考虑删除对应关系
-     */
+    /*------------  LocalMedia ------------*/
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertMediaData(data: LocalMedia): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertMediaData(data: List<LocalMedia>): LongArray
+
     @Delete
-    fun deleteMediaData(group: LocalMediaGroup, data: LocalMedia): Int
+    fun deleteMediaData(data: LocalMedia): Int
 
+    @Delete
+    fun deleteMediaData(data: List<LocalMedia>): Int
 
+    @Query("DELETE FROM `media` WHERE id NOT IN (SELECT id FROM group_data_cross_ref)")
+    fun deleteUnuseMediaData(): Int
+
+    /*------------  GroupDataCrossRef ------------*/
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertGroupCrossRef(data: GroupDataCrossRef): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertGroupCrossRef(data: List<GroupDataCrossRef>): LongArray
+
+    @Delete
+    fun deleteGroupCrossRef(data: List<GroupDataCrossRef>): Int
+
+    @Query("DELETE FROM group_data_cross_ref WHERE group_id = :groupId")
+    fun deleteGroupCrossRef(groupId: Long): Int
+
+    @Query("DELETE FROM group_data_cross_ref WHERE group_id IN (:groupIds)")
+    fun deleteGroupCrossRef(groupIds: Array<Long>): Int
 }

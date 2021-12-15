@@ -7,7 +7,7 @@
 
         <variable
             name="VM"
-            type="com.xter.pickit.ui.album.PhotoAlbumViewModel" />
+            type="com.xter.pickit.ui.album.PhotoDetailViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

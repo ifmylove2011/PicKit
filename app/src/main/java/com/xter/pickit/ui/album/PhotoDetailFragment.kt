@@ -7,12 +7,11 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoDetailBinding
+import com.xter.pickit.ext.KEY_MEDIA_DATA
 import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
 
-/**
-
- */
+@Deprecated(message = "考虑到详情页面需要复用，以及nav的特性，toolbar的操作，使用activity进行控制比较好")
 class PhotoDetailFragment : Fragment() {
 
 //    companion object {
@@ -52,12 +51,10 @@ class PhotoDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         detailBinding.lifecycleOwner = this.viewLifecycleOwner
         detailBinding.vpImageDetail.apply {
-            detailBinding.vm?.let { VM ->
-                photoDetailAdapter = PhotoDetailAdapter(VM)
-            }
-            this.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
+            photoDetailAdapter = PhotoDetailAdapter()
+            this.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    (activity as AppCompatActivity).supportActionBar?.let{ toolbar->
+                    (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
                         toolbar.title = photoVM.images.value?.get(position)?.name
                     }
                 }
@@ -98,7 +95,7 @@ class PhotoDetailFragment : Fragment() {
 //            L.i("位置变化${pos}")
 //            detailBinding.vpImageDetail.setCurrentItem(pos, false)
 //        })
-        arguments?.getInt(KEY_MEDIA_DATA_POS)?.let { pos ->
+        arguments?.getInt(KEY_MEDIA_DATA)?.let { pos ->
             detailBinding.vpImageDetail.setCurrentItem(pos, false)
         }
     }
@@ -113,7 +110,7 @@ class PhotoDetailFragment : Fragment() {
             R.id.action_copy -> {
                 true
             }
-            R.id.action_detail-> {
+            R.id.action_detail -> {
                 true
             }
             else -> false
