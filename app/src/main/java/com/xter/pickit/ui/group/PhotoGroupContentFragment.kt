@@ -3,10 +3,12 @@ package com.xter.pickit.ui.group
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoGroupContentBinding
 import com.xter.pickit.entity.LocalMedia
@@ -60,7 +62,10 @@ class PhotoGroupContentFragment : Fragment() {
                     val mediaData = groupContentFolder.binding.mediaData
                     L.i(mediaData.toString())
                     Intent(requireActivity(), PhotoDetailActivity::class.java).let { intent ->
-                        intent.putParcelableArrayListExtra(KEY_MEDIA_DATA, photoGroupVM.images.value as ArrayList<LocalMedia>)
+                        intent.putParcelableArrayListExtra(
+                            KEY_MEDIA_DATA,
+                            photoGroupVM.images.value as ArrayList<LocalMedia>
+                        )
                         intent.putExtra(KEY_MEDIA_DATA_POS, position)
                         startActivity(intent)
                     }
@@ -158,7 +163,7 @@ class PhotoGroupContentFragment : Fragment() {
                 true
             }
             R.id.action_delete -> {
-
+                deleteDataDialog()
                 true
             }
             R.id.action_layout_grid -> {
@@ -179,6 +184,29 @@ class PhotoGroupContentFragment : Fragment() {
         view?.findNavController()?.navigate(R.id.action_nav_group_content_to_nav_ablum, bundle)
     }
 
+    fun deleteDataDialog() {
+        photoContentAdapter.getSelectGroups().let { list ->
+            if (list.isNotEmpty()) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("删除")
+                    .setMessage("是否删除选中的${list.size}项")
+                    .setCancelable(false)
+                    .setPositiveButton(
+                        R.string.sure
+                    ) { dialog, _ ->
+                        photoGroupVM.deleteSelectedData(list)
+                        dialog?.dismiss()
+                    }
+                    .setNegativeButton(
+                        R.string.cancel
+                    ) { dialog, _ -> dialog?.dismiss() }
+                    .create()
+                    .show()
+            } else {
+                Snackbar.make(photoBinding.rvAblum, "未选中", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun onResume() {
         super.onResume()

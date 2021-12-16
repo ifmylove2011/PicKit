@@ -11,7 +11,7 @@ import com.xter.pickit.entity.LocalMediaGroup
  * @Date 2021/12/8 14:15
  * @Description ROOM数据库
  */
-@Database(entities = [LocalMediaGroup::class, LocalMedia::class, GroupDataCrossRef::class], version = 2)
+@Database(entities = [LocalMediaGroup::class, LocalMedia::class, GroupDataCrossRef::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun mediaDao(): MediaDao
 }

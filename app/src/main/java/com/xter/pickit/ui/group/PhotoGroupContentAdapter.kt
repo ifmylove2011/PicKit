@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.xter.pickit.R
 import com.xter.pickit.databinding.ItemGroupImageBinding
 import com.xter.pickit.entity.LocalMedia
@@ -14,8 +13,6 @@ import com.xter.pickit.ext.GlideApp
 import com.xter.pickit.kit.L
 import com.xter.pickit.ui.album.ContentDiffCallback
 import com.xter.pickit.ui.album.ContentStyle
-import com.xter.pickit.ui.album.ItemStyle
-import com.xter.pickit.ui.album.OnImageClickListener
 
 /**
  * @Author XTER
@@ -45,6 +42,15 @@ class PhotoGroupContentAdapter(private val VM: PhotoGroupViewModel) :
         } else if (mStyle == ContentStyle.LIST) {
         }
         notifyDataSetChanged()
+    }
+
+    fun getSelectGroups(): List<LocalMedia> {
+        val selectedGroups = mutableListOf<LocalMedia>()
+        for (lmg in currentList) {
+            if (lmg.isSelected)
+                selectedGroups.add(lmg)
+        }
+        return selectedGroups
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupContentViewHolder {

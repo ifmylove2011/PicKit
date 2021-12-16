@@ -54,7 +54,7 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
         return result
     }
 
-    fun clearSelectedState(){
+    fun clearSelectedState() {
         for (data in currentList) {
             if (data.isSelected) {
                 data.isSelected = false
@@ -79,6 +79,7 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
                         if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
                 }
                 data.isSelected = isChecked
+                data.lastedViewTime = System.currentTimeMillis() / 1000
             }
             if (VM.choiceModeOpenForContent.value!!) {
                 binding.cbSelected.visibility = View.VISIBLE

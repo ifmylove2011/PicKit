@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "55351a52ad2df88f6fed28d7032fd35f",
+    "identityHash": "66a3bcf8389007cc3e2c3ce3188e9fe1",
     "entities": [
       {
         "tableName": "group",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`group_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `first_image_path` TEXT, `first_mime_type` TEXT, `image_num` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`group_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `first_image_path` TEXT, `first_mime_type` TEXT, `image_num` INTEGER NOT NULL, `date_added` INTEGER NOT NULL, `date_modified` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "groupId",
@@ -37,6 +37,18 @@
             "columnName": "image_num",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "dateAddedTime",
+            "columnName": "date_added",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateModifiedTime",
+            "columnName": "date_modified",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -50,7 +62,7 @@
       },
       {
         "tableName": "media",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `bucket_id` INTEGER NOT NULL, `name` TEXT, `parent_name` TEXT, `path` TEXT, `real_path` TEXT, `duration` INTEGER NOT NULL, `mime_type` TEXT, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `size` INTEGER NOT NULL, `date_added` INTEGER NOT NULL, `date_modified` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `bucket_id` INTEGER NOT NULL, `name` TEXT, `parent_name` TEXT, `path` TEXT, `real_path` TEXT, `duration` INTEGER NOT NULL, `mime_type` TEXT, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `size` INTEGER NOT NULL, `date_added` INTEGER NOT NULL, `date_modified` INTEGER NOT NULL, `date_lasted_view` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -129,6 +141,12 @@
             "columnName": "date_modified",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "lastedViewTime",
+            "columnName": "date_lasted_view",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -171,7 +189,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '55351a52ad2df88f6fed28d7032fd35f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '66a3bcf8389007cc3e2c3ce3188e9fe1')"
     ]
   }
 }

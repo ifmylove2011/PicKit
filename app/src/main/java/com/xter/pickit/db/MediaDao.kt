@@ -28,7 +28,7 @@ interface MediaDao {
     @Delete
     fun deleteGroups(groups: List<LocalMediaGroup>): Int
 
-    @Query("SELECT * FROM `group`")
+    @Query("SELECT * FROM `group` ORDER BY `date_modified` DESC")
     fun queryGroup(): List<LocalMediaGroup>?
 
     /*------------  MediaGroupWithData ------------*/
@@ -76,4 +76,7 @@ interface MediaDao {
 
     @Query("DELETE FROM group_data_cross_ref WHERE group_id IN (:groupIds)")
     fun deleteGroupCrossRef(groupIds: Array<Long>): Int
+
+    @Query("DELETE FROM group_data_cross_ref WHERE group_id = (:groupId) AND id IN (:mediaIds)")
+    fun deleteMediaCrossRef(groupId: Long, mediaIds: Array<Long>): Int
 }

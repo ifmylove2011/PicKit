@@ -20,6 +20,8 @@ data class LocalMediaGroup(
     @ColumnInfo(name = "first_image_path") var firstImagePath: String?,
     @ColumnInfo(name = "first_mime_type") var firstMimeType: String?,
     @ColumnInfo(name = "image_num") var imageNum: Int,
+    @ColumnInfo(name = "date_added") var dateAddedTime: Long = 0,
+    @ColumnInfo(name = "date_modified") var dateModifiedTime: Long = 0
 ) : Parcelable {
 
     @Ignore var coverData: List<LocalMedia>? = ArrayList()
@@ -31,25 +33,14 @@ data class LocalMediaGroup(
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
-        parcel.readInt()
+        parcel.readInt(),
+        parcel.readLong(),
+        parcel.readLong()
     ) {
         coverData = parcel.createTypedArrayList(LocalMedia)
         selected = parcel.readByte() != 0.toByte()
     }
 
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeLong(groupId)
-        parcel.writeString(name)
-        parcel.writeString(firstImagePath)
-        parcel.writeString(firstMimeType)
-        parcel.writeInt(imageNum)
-        parcel.writeTypedList(coverData)
-        parcel.writeByte(if (selected) 1 else 0)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
 
     override fun toString(): String {
         return "LocalMediaGroup(groupId=$groupId, name=$name, firstImagePath=$firstImagePath, firstMimeType=$firstMimeType, imageNum=$imageNum, selected=$selected)"
@@ -81,6 +72,22 @@ data class LocalMediaGroup(
         return result
     }
 
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeLong(groupId)
+        parcel.writeString(name)
+        parcel.writeString(firstImagePath)
+        parcel.writeString(firstMimeType)
+        parcel.writeInt(imageNum)
+        parcel.writeLong(dateAddedTime)
+        parcel.writeLong(dateModifiedTime)
+        parcel.writeTypedList(coverData)
+        parcel.writeByte(if (selected) 1 else 0)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
     companion object CREATOR : Parcelable.Creator<LocalMediaGroup> {
         override fun createFromParcel(parcel: Parcel): LocalMediaGroup {
             return LocalMediaGroup(parcel)
@@ -90,6 +97,5 @@ data class LocalMediaGroup(
             return arrayOfNulls(size)
         }
     }
-
 
 }

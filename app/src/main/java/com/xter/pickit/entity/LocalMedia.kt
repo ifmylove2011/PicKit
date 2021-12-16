@@ -32,6 +32,9 @@ data class LocalMedia(
     @ColumnInfo(name = "date_modified") var dateModifiedTime: Long
 ) : Parcelable {
 
+    @ColumnInfo(name = "date_lasted_view")
+    var lastedViewTime: Long = 0
+
     @Ignore
     var originalPath: String? = null
 
@@ -69,6 +72,7 @@ data class LocalMedia(
         parcel.readLong(),
         parcel.readLong()
     ) {
+        lastedViewTime = parcel.readLong()
         originalPath = parcel.readString()
         androidQToPath = parcel.readString()
         isSelected = parcel.readByte() != 0.toByte()
@@ -95,6 +99,10 @@ data class LocalMedia(
         return DateTimeUtils.getNormalDate1(dateModifiedTime * 1000)
     }
 
+    fun getFormatLastedViewTime(): String {
+        return DateTimeUtils.getNormalDate1(lastedViewTime * 1000)
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeLong(id)
         parcel.writeLong(bucketId)
@@ -109,6 +117,7 @@ data class LocalMedia(
         parcel.writeLong(size)
         parcel.writeLong(dateAddedTime)
         parcel.writeLong(dateModifiedTime)
+        parcel.writeLong(lastedViewTime)
         parcel.writeString(originalPath)
         parcel.writeString(androidQToPath)
         parcel.writeByte(if (isSelected) 1 else 0)

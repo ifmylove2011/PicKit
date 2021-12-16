@@ -42,7 +42,15 @@ class PhotoGroupViewModel : ViewModel() {
 
     fun createNewGroup(groupName: String?) {
         viewModelScope.launch {
-            LocalMediaGroup(0L, groupName, "", "", 0).let { group ->
+            LocalMediaGroup(
+                0L,
+                groupName,
+                "",
+                "",
+                0,
+                System.currentTimeMillis() / 1000,
+                System.currentTimeMillis() / 1000
+            ).let { group ->
                 val id = RoomDBM.get().insertGroup(group)
                 if (id != 0L) {
                     if (TextUtils.isEmpty(groupName)) {
@@ -84,7 +92,8 @@ class PhotoGroupViewModel : ViewModel() {
             dataLoadCompleted.value = false
             group?.let {
                 RoomDBM.get().getGroupWithData(it.groupId)?.let { result ->
-                    images.value = result.mediaData
+                    images.value =
+                        result.mediaData.sortedByDescending { data -> data.lastedViewTime }
                     //如果group.imageNum不符合，就更新一下
                     if (group.imageNum != result.mediaData.size) {
                         group.imageNum = result.mediaData.size
@@ -100,6 +109,15 @@ class PhotoGroupViewModel : ViewModel() {
         viewModelScope.launch {
             RoomDBM.get()
                 .saveMediaDataWithCrossRef(currentGroup.value!!, pickingGroupData.value!!.toList())
+        }
+    }
+
+    fun deleteSelectedData(data: List<LocalMedia>) {
+        viewModelScope.launch {
+            RoomDBM.get().deleteMediaData(currentGroup.value!!, data)
+            selectNum.value = 0
+            choiceModeOpenForContent.value = false
+            loadGroupMediaData(currentGroup.value!!)
         }
     }
 }

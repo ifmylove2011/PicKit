@@ -40,6 +40,8 @@ class RoomDBM private constructor() {
                 context.applicationContext,
                 AppDatabase::class.java, DATABASE_NAME
             ).addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_2_3)
+                .addMigrations(MIGRATION_3_4)
                 .build()
         }
     }
@@ -54,6 +56,23 @@ class RoomDBM private constructor() {
             database.execSQL("DROP TABLE `media`")
             database.execSQL("ALTER TABLE `media_new` RENAME TO `media`")
             L.w("MIGRATION_1_2 end")
+        }
+    }
+
+    private val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            L.w("MIGRATION_2_3 begin")
+            database.execSQL("ALTER TABLE `group` ADD COLUMN `date_added` INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE `group` ADD COLUMN `date_modified` INTEGER NOT NULL DEFAULT 0")
+            L.w("MIGRATION_2_3 end")
+        }
+    }
+
+    private val MIGRATION_3_4: Migration = object : Migration(3, 4) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            L.w("MIGRATION_3_4 begin")
+            database.execSQL("ALTER TABLE `media` ADD COLUMN `date_lasted_view` INTEGER NOT NULL DEFAULT 0")
+            L.w("MIGRATION_3_4 end")
         }
     }
 
@@ -77,6 +96,11 @@ class RoomDBM private constructor() {
         return@withContext database?.mediaDao()?.getGroupWithData(groupId)
     }
 
+    /**
+     * 1.删除group本体
+     * 2.删除级联实体GroupCrossRef
+     * 3.删除未引用的LocalMedia
+     */
     suspend fun deleteGroups(groups: List<LocalMediaGroup>): Int = withContext(Dispatchers.IO) {
         val size = database?.mediaDao()?.deleteGroups(groups)
         groups.map {
@@ -87,7 +111,7 @@ class RoomDBM private constructor() {
             val refSize = database?.mediaDao()?.deleteGroupCrossRef(groupIdArray)
             if (refSize != 0) {
                 val rows = database?.mediaDao()?.deleteUnuseMediaData()
-                L.i("delete LocalMedia num = $rows")
+                L.i("delete unused LocalMedia num = $rows")
             }
         }
         return@withContext size!!
@@ -115,14 +139,23 @@ class RoomDBM private constructor() {
             }
         }
 
-    suspend fun checkGroup(group: LocalMediaGroup) {
-
-    }
-
     /**
-     * 主要是删除未被引用的LocalMedia
+     * 1.删除级联实体数据
+     * 2.删除未引用的LocalMedia
      */
-    suspend fun checkMediaData() {
+    suspend fun deleteMediaData(group: LocalMediaGroup, data: List<LocalMedia>) =
+        withContext(Dispatchers.IO) {
+            data.map {
+                it.id
+            }.let { mediaIds ->
+                val mediaIdArray = mediaIds.toTypedArray()
+                L.i(mediaIdArray.contentToString())
+                val refSize = database?.mediaDao()?.deleteMediaCrossRef(group.groupId, mediaIdArray)
+                if (refSize != 0) {
+                    val rows = database?.mediaDao()?.deleteUnuseMediaData()
+                    L.i("delete unused LocalMedia num = $rows")
+                }
+            }
+        }
 
-    }
 }
