@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoGroupBinding
-import com.xter.pickit.ext.KEY_GROUP
-import com.xter.pickit.ext.ViewModelFactory
+import com.xter.pickit.db.SPM
+import com.xter.pickit.ext.*
 import com.xter.pickit.kit.L
 import com.xter.pickit.ui.album.ItemStyle
 
@@ -59,6 +59,8 @@ class PhotoGroupFragment : Fragment() {
                 }
 
             })
+            //布局参数
+            checkGroupStyle()
             adapter = photoGroupAdapter
         }
         //数据加载完成后，赋予adapter数据
@@ -117,6 +119,10 @@ class PhotoGroupFragment : Fragment() {
         if (photoGroupVM.groups.value == null) {
             photoGroupVM.loadGroups()
         }
+        //布局的改变
+        photoGroupVM.groupStyle.observe(viewLifecycleOwner, { style ->
+            photoGroupVM.loadGroups()
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -135,15 +141,34 @@ class PhotoGroupFragment : Fragment() {
                 true
             }
             R.id.action_layout_grid -> {
+                SPM.saveStr(context, CONFIG, KEY_GROUP, ItemStyle.GRID.name)
                 photoGroupAdapter.setItemStyle(ItemStyle.GRID)
                 true
             }
             R.id.action_layout_default -> {
+                SPM.saveStr(context, CONFIG, KEY_GROUP, ItemStyle.DEFAULT.name)
                 photoGroupAdapter.setItemStyle(ItemStyle.DEFAULT)
+                true
+            }
+            R.id.action_layout_stack -> {
+                SPM.saveStr(context, CONFIG, KEY_GROUP, ItemStyle.STACK.name)
+                photoGroupAdapter.setItemStyle(ItemStyle.STACK)
                 true
             }
             else -> false
         }
+    }
+
+    fun checkGroupStyle() {
+        val style = SPM.getStr(this.context, CONFIG, KEY_GROUP, ItemStyle.DEFAULT.name)
+        if (style == ItemStyle.GRID.name) {
+            val row = SPM.getInt(this.context, CONFIG, GRID_ROW, 2)
+            val column = SPM.getInt(this.context, CONFIG, GRID_COLUMN, 2)
+            photoGroupVM.gridSpanPair.value = Pair(row, column)
+        } else if (style == ItemStyle.STACK.name) {
+            photoGroupVM.stackNum.value = SPM.getInt(this.context, CONFIG, STACK_NUM, 3)
+        }
+        photoGroupAdapter.setItemStyle(ItemStyle.valueOf(style))
     }
 
     fun createGroupDialog() {

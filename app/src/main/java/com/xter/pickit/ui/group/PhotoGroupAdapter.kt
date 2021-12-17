@@ -13,6 +13,8 @@ import com.xter.pickit.entity.LocalMediaGroup
 import com.xter.pickit.ext.GlideApp
 import com.xter.pickit.kit.L
 import com.xter.pickit.ui.album.ItemStyle
+import com.xter.pickit.ui.widget.MODE_GRID
+import com.xter.pickit.ui.widget.MODE_STACK
 
 /**
  * @Author XTER
@@ -36,8 +38,8 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
 
     fun setItemStyle(style: ItemStyle) {
         mStyle = style
-        L.d("style=${style.toString()}")
-        notifyDataSetChanged()
+        L.d("style=${style}")
+        VM.groupStyle.value = style
     }
 
     fun getSelectGroups(): List<LocalMediaGroup> {
@@ -92,18 +94,21 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
                 }
             }
 
-            if (mStyle == ItemStyle.GRID) {
+            if (mStyle == ItemStyle.GRID || mStyle == ItemStyle.STACK) {
                 groupFolder.binding.gicGroupCover.visibility = View.VISIBLE
                 groupFolder.binding.ivGroupCover.visibility = View.GONE
                 val images = groupFolder.binding.gicGroupCover.getImageViews()
-                for (iv in images) {
-                    GlideApp.with(itemView)
-                        .load(group.firstImagePath)
-                        .transition(withCrossFade())
-                        .centerCrop()
-                        .placeholder(R.drawable.image_placeholder)
-                        .error(R.mipmap.ic_error)
-                        .into(iv)
+                group.coverData?.let { covers ->
+                    val maxSize = covers.size
+                    for ((index, iv) in images.withIndex()) {
+                        GlideApp.with(itemView)
+                            .load(if (index < maxSize) covers[index].path else null)
+                            .transition(withCrossFade())
+                            .centerCrop()
+                            .placeholder(R.drawable.image_placeholder)
+                            .error(R.mipmap.ic_error)
+                            .into(iv)
+                    }
                 }
             } else if (mStyle == ItemStyle.DEFAULT) {
                 groupFolder.binding.gicGroupCover.visibility = View.GONE
@@ -135,6 +140,20 @@ class GroupViewHolder private constructor(val binding: ItemGroupCoverBinding) :
         binding.apply {
             this.photoGroupVM = vm
             this.group = item
+            vm.groupStyle.value?.also { style ->
+                if (style == ItemStyle.GRID) {
+                    vm.gridSpanPair.value?.let { pair ->
+                        this.gicGroupCover.setRow(pair.first)
+                        this.gicGroupCover.setColumn(pair.second)
+                    }
+                    this.gicGroupCover.setMode(MODE_GRID)
+                } else if (style == ItemStyle.STACK) {
+                    vm.stackNum.value?.let { stackNum ->
+                        this.gicGroupCover.setStackNum(stackNum)
+                    }
+                    this.gicGroupCover.setMode(MODE_STACK)
+                }
+            }
             this.executePendingBindings()
         }
     }

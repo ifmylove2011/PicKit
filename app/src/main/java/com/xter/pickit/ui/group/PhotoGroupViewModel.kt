@@ -8,6 +8,7 @@ import com.xter.pickit.db.RoomDBM
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.entity.LocalMediaGroup
 import com.xter.pickit.kit.L
+import com.xter.pickit.ui.album.ItemStyle
 import kotlinx.coroutines.launch
 
 /**
@@ -39,6 +40,18 @@ class PhotoGroupViewModel : ViewModel() {
     val pickingGroupData: MutableLiveData<HashSet<LocalMedia>> =
         MutableLiveData<HashSet<LocalMedia>>(HashSet())
     val pickingNum: MutableLiveData<Int> = MutableLiveData(pickingGroupData.value?.size)
+
+    /**
+     * 记录网格布局的行列值
+     */
+    val gridSpanPair: MutableLiveData<Pair<Int, Int>> = MutableLiveData<Pair<Int, Int>>(Pair(2, 2))
+
+    /**
+     * 记录层叠布局下的数量值
+     */
+    val stackNum: MutableLiveData<Int> = MutableLiveData<Int>(3)
+
+    val groupStyle: MutableLiveData<ItemStyle> = MutableLiveData(ItemStyle.DEFAULT)
 
     fun createNewGroup(groupName: String?) {
         viewModelScope.launch {
@@ -81,7 +94,17 @@ class PhotoGroupViewModel : ViewModel() {
     fun loadGroups() {
         viewModelScope.launch {
             groupLoadCompleted.value = false
-            val data = RoomDBM.get().queryGroup()
+            val data = when (groupStyle.value) {
+                ItemStyle.GRID -> {
+                    RoomDBM.get().queryGroup(gridSpanPair.value?.first!! * gridSpanPair.value?.second!!)
+                }
+                ItemStyle.STACK -> {
+                    RoomDBM.get().queryGroup(stackNum.value!!)
+                }
+                else -> {
+                    RoomDBM.get().queryGroup()
+                }
+            }
             groups.value = data
             groupLoadCompleted.value = true
         }

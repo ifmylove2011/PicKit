@@ -23,6 +23,11 @@ const val KEY_MEDIA_DATA_POS = "mediaDataPos"
 
 const val TAG_DETAIL = "detail"
 
+const val CONFIG = "config"
+const val GRID_ROW = "grid_row"
+const val GRID_COLUMN = "grid_column"
+const val STACK_NUM = "stack_num"
+
 object ViewModelFactory : ViewModelProvider.Factory {
 
     private val vmMap = HashMap<String, ViewModel?>()

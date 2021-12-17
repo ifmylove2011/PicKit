@@ -60,6 +60,12 @@ interface MediaDao {
     @Query("DELETE FROM `media` WHERE id NOT IN (SELECT id FROM group_data_cross_ref)")
     fun deleteUnuseMediaData(): Int
 
+    @Query("SELECT * FROM `media` WHERE id IN (SELECT id FROM group_data_cross_ref WHERE group_id = :groupId) ORDER BY date_lasted_view DESC,date_modified DESC LIMIT 1")
+    fun queryLastedMediaData(groupId: Long): LocalMedia
+
+    @Query("SELECT * FROM `media` WHERE id IN (SELECT id FROM group_data_cross_ref WHERE group_id = :groupId) ORDER BY date_lasted_view DESC,date_modified DESC LIMIT :limit")
+    fun queryLastedMoreMediaData(groupId: Long, limit: Int): List<LocalMedia>
+
     /*------------  GroupDataCrossRef ------------*/
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

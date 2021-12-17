@@ -88,6 +88,14 @@ class RoomDBM private constructor() {
         return@withContext database?.mediaDao()?.queryGroup()
     }
 
+    suspend fun queryGroup(coverNum: Int): List<LocalMediaGroup>? = withContext(Dispatchers.IO) {
+        val data = database?.mediaDao()?.queryGroup()?.onEach { group ->
+            group.coverData =
+                database?.mediaDao()?.queryLastedMoreMediaData(group.groupId, coverNum)
+        }
+        return@withContext data
+    }
+
     suspend fun getGroupWithData(): List<MediaGroupWithData>? = withContext(Dispatchers.IO) {
         return@withContext database?.mediaDao()?.getGroupWithData()
     }
@@ -133,8 +141,7 @@ class RoomDBM private constructor() {
                 //存储级联表，更新group
                 database?.mediaDao()?.insertGroupCrossRef(crossRefList)?.let { refIdArray ->
                     L.i("save GroupDataCrossRef num ${refIdArray.size}")
-                    group.imageNum = group.imageNum + refIdArray.size
-                    database?.mediaDao()?.updateGroup(group)
+                    updateGroupState(group, refIdArray.size)
                 }
             }
         }
@@ -142,6 +149,7 @@ class RoomDBM private constructor() {
     /**
      * 1.删除级联实体数据
      * 2.删除未引用的LocalMedia
+     * 3.更新上级数据
      */
     suspend fun deleteMediaData(group: LocalMediaGroup, data: List<LocalMedia>) =
         withContext(Dispatchers.IO) {
@@ -154,8 +162,24 @@ class RoomDBM private constructor() {
                 if (refSize != 0) {
                     val rows = database?.mediaDao()?.deleteUnuseMediaData()
                     L.i("delete unused LocalMedia num = $rows")
+                    updateGroupState(group, -refSize!!)
                 }
             }
         }
 
+    /**
+     * 更新group信息，包括修改时间与封面检测改动
+     */
+    suspend fun updateGroupState(group: LocalMediaGroup, changeNum: Int) {
+        group.imageNum += changeNum
+        if (group.dateAddedTime == 0L) {
+            group.dateAddedTime = System.currentTimeMillis() / 1000
+        }
+        group.dateModifiedTime = System.currentTimeMillis() / 1000
+        database?.mediaDao()?.queryLastedMediaData(group.groupId)?.let { localMedia ->
+            group.firstImagePath = localMedia.path
+            group.firstMimeType = localMedia.mimeType
+        }
+        database?.mediaDao()?.updateGroup(group)
+    }
 }

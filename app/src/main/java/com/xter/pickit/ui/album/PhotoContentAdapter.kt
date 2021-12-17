@@ -3,7 +3,6 @@ package com.xter.pickit.ui.album
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -79,7 +78,9 @@ class PhotoContentAdapter(private val VM: PhotoAlbumViewModel) :
                         if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
                 }
                 data.isSelected = isChecked
-                data.lastedViewTime = System.currentTimeMillis() / 1000
+                if (isChecked) {
+                    data.lastedViewTime = System.currentTimeMillis() / 1000
+                }
             }
             if (VM.choiceModeOpenForContent.value!!) {
                 binding.cbSelected.visibility = View.VISIBLE

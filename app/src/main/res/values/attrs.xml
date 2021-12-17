@@ -15,9 +15,14 @@
         <attr name="editable" format="boolean"/>
     </declare-styleable>
 
-    <declare-styleable name="GridImageContainer">
+    <declare-styleable name="ImageContainer">
+        <attr name="mode" format="enum">
+            <enum name="grid" value="1"/>
+            <enum name="stack" value="2"/>
+        </attr>
         <attr name="row" format="integer" />
         <attr name="column" format="integer" />
+        <attr name="stack_num" format="integer" />
         <attr name="padding" format="dimension"/>
     </declare-styleable>
 </resources>
