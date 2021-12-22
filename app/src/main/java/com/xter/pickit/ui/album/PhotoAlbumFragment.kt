@@ -10,10 +10,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
-import com.xter.pickit.ext.KEY_FOLDER
-import com.xter.pickit.ext.KEY_PICK
-import com.xter.pickit.ext.TAG_DETAIL
-import com.xter.pickit.ext.ViewModelFactory
+import com.xter.pickit.db.SPM
+import com.xter.pickit.ext.*
 import com.xter.pickit.kit.L
 import pub.devrel.easypermissions.EasyPermissions
 
@@ -79,6 +77,8 @@ class PhotoAlbumFragment : Fragment() {
                 }
 
             })
+            //布局参数
+            checkGroupStyle()
             adapter = photoFolderAdapter
         }
         //首次得拿到权限
@@ -126,7 +126,22 @@ class PhotoAlbumFragment : Fragment() {
                 }
             }
         })
+        //布局的改变
+        photoVM.groupStyle.observe(viewLifecycleOwner, { style ->
+            photoFolderAdapter.notifyDataSetChanged()
+        })
+    }
 
+    fun checkGroupStyle() {
+        val style = SPM.getStr(this.context, CONFIG, KEY_FOLDER, ItemStyle.DEFAULT.name)
+        if (style == ItemStyle.GRID.name) {
+            val row = SPM.getInt(this.context, CONFIG, GRID_ROW, 2)
+            val column = SPM.getInt(this.context, CONFIG, GRID_COLUMN, 2)
+            photoVM.gridSpanPair.value = Pair(row, column)
+        } else if (style == ItemStyle.STACK.name) {
+            photoVM.stackNum.value = SPM.getInt(this.context, CONFIG, STACK_NUM, 3)
+        }
+        photoFolderAdapter.setItemStyle(ItemStyle.valueOf(style))
     }
 
     fun createDetailFragment() {
@@ -158,11 +173,23 @@ class PhotoAlbumFragment : Fragment() {
 //                true
 //            }
             R.id.action_layout_grid -> {
+                SPM.saveStr(context, CONFIG, KEY_FOLDER, ItemStyle.GRID.name)
                 photoFolderAdapter.setItemStyle(ItemStyle.GRID)
                 true
             }
             R.id.action_layout_default -> {
+                SPM.saveStr(context, CONFIG, KEY_FOLDER, ItemStyle.DEFAULT.name)
                 photoFolderAdapter.setItemStyle(ItemStyle.DEFAULT)
+                true
+            }
+            R.id.action_layout_stack -> {
+                SPM.saveStr(context, CONFIG, KEY_FOLDER, ItemStyle.STACK.name)
+                photoFolderAdapter.setItemStyle(ItemStyle.STACK)
+                true
+            }
+            R.id.action_layout_list -> {
+                SPM.saveStr(context, CONFIG, KEY_FOLDER, ItemStyle.LIST.name)
+                photoFolderAdapter.setItemStyle(ItemStyle.LIST)
                 true
             }
             else -> false

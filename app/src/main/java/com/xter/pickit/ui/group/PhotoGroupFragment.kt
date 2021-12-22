@@ -155,6 +155,11 @@ class PhotoGroupFragment : Fragment() {
                 photoGroupAdapter.setItemStyle(ItemStyle.STACK)
                 true
             }
+            R.id.action_layout_list -> {
+                SPM.saveStr(context, CONFIG, KEY_GROUP, ItemStyle.LIST.name)
+                photoGroupAdapter.setItemStyle(ItemStyle.LIST)
+                true
+            }
             else -> false
         }
     }

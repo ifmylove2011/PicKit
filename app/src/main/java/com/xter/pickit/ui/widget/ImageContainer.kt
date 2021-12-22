@@ -39,6 +39,7 @@ class ImageContainer : ViewGroup {
 
     private var mode = 1
     private var mStackNum = 3
+    private var mStackSpan = 0
 
     private var mImageViews = ArrayList<ImageView>()
 
@@ -46,13 +47,13 @@ class ImageContainer : ViewGroup {
         val a = context.obtainStyledAttributes(attrs, R.styleable.ImageContainer)
         mode = a.getInt(R.styleable.ImageContainer_mode, MODE_GRID)
 
-        if (mode == MODE_GRID) {
-            mRow = a.getInt(R.styleable.ImageContainer_row, ROW)
-            mColumn = a.getInt(R.styleable.ImageContainer_column, COLUMN)
-        } else if (mode == MODE_STACK) {
-            mStackNum = a.getInt(R.styleable.ImageContainer_stack_num, STACKS)
-        }
-
+        mRow = a.getInt(R.styleable.ImageContainer_row, ROW)
+        mColumn = a.getInt(R.styleable.ImageContainer_column, COLUMN)
+        mStackNum = a.getInt(R.styleable.ImageContainer_stack_num, STACKS)
+        mStackSpan = a.getDimensionPixelSize(
+            R.styleable.ImageContainer_stack_span,
+            resources.getDimensionPixelOffset(R.dimen.item_span)
+        )
         mPadding = a.getDimensionPixelSize(
             R.styleable.ImageContainer_padding,
             resources.getDimensionPixelOffset(R.dimen.item_padding)
@@ -69,7 +70,7 @@ class ImageContainer : ViewGroup {
 
     private fun createImageViews() {
         val count = getCount()
-        L.i("createImageviews count = $count")
+//        L.i("createImageviews count = $count,mode=$mode")
         for (i in 0 until count) {
             val childImageView = ImageView(context)
             addView(childImageView)
@@ -84,7 +85,7 @@ class ImageContainer : ViewGroup {
             //确定每个视图的宽高
             val unitWidth = (r - l - (mColumn - 1) * mPadding) / mColumn
             val unitHeight = (b - t - (mRow - 1) * mPadding) / mRow
-//        L.i("unitWidth=$unitWidth,unitHeight=$unitHeight")
+//            L.i("unitWidth=$unitWidth,unitHeight=$unitHeight,count=$count")
             //寻位
             for (i in 0 until count) {
                 val child = getChildAt(i)
@@ -100,11 +101,13 @@ class ImageContainer : ViewGroup {
                 child.layout(left, top, left + unitWidth, top + unitHeight)
             }
         } else if (mode == MODE_STACK) {
-            val unitWidth = (r - l - mPadding * (mStackNum - 1))
+            val unitWidth = (r - l - mStackSpan * (mStackNum - 1))
+//            L.i("width=$unitWidth,count=$count")
             for (i in 0 until count) {
                 val child = getChildAt(i)
-                val left = mPadding * i
-                val top = mPadding * i
+                val left = mStackSpan * i
+                val top = mStackSpan * (count - i - 1)
+                child.z = top.toFloat()
                 child.layout(left, top, left + unitWidth, top + unitWidth)
             }
         }
@@ -115,28 +118,22 @@ class ImageContainer : ViewGroup {
     }
 
     fun setRow(row: Int) {
-        if (mRow != row) {
+        if (mRow != row && mode == MODE_GRID) {
             mRow = if (row > 0) {
                 row
             } else {
                 ROW
             }
-            mImageViews.clear()
-            createImageViews()
-            requestLayout()
         }
     }
 
     fun setColumn(column: Int) {
-        if (mColumn != column) {
+        if (mColumn != column && mode == MODE_GRID) {
             mColumn = if (column > 0) {
                 column
             } else {
                 COLUMN
             }
-            mImageViews.clear()
-            createImageViews()
-            requestLayout()
         }
     }
 
@@ -146,25 +143,26 @@ class ImageContainer : ViewGroup {
             padding,
             metrics
         )
-        postInvalidate()
     }
 
     fun setMode(mode: Int) {
         if (this.mode != mode) {
             this.mode = mode
-//            mImageViews.clear()
-//            createImageViews()
-//            requestLayout()
         }
     }
 
     fun setStackNum(stackNum: Int) {
-        if (this.mStackNum != stackNum) {
+        if (this.mStackNum != stackNum && mode == MODE_STACK) {
             this.mStackNum = stackNum
-            mImageViews.clear()
-            createImageViews()
-            requestLayout()
         }
+    }
+
+    fun setStackSpan(stackSpan: Int) {
+        val metrics = resources.displayMetrics
+        mStackSpan = TypedValue.complexToDimensionPixelSize(
+            stackSpan,
+            metrics
+        )
     }
 
     fun getImageViews(): List<ImageView> {
@@ -176,4 +174,4 @@ const val ROW = 1
 const val COLUMN = 1
 const val MODE_GRID = 1
 const val MODE_STACK = 2
-const val STACKS = 2
+const val STACKS = 3

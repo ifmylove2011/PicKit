@@ -10,13 +10,13 @@ import com.xter.pickit.entity.LocalMediaGroup
 import com.xter.pickit.kit.L
 import com.xter.pickit.ui.album.ItemStyle
 import kotlinx.coroutines.launch
+import java.util.ArrayList
 
 /**
  * @Author XTER
  * @Date 2021/12/9 9:28
- * @Description
+ * @Description 分组逻辑VM
  */
-
 class PhotoGroupViewModel : ViewModel() {
 
     /**
@@ -51,6 +51,9 @@ class PhotoGroupViewModel : ViewModel() {
      */
     val stackNum: MutableLiveData<Int> = MutableLiveData<Int>(3)
 
+    /**
+     * 分组目录所用的ItemStyle
+     */
     val groupStyle: MutableLiveData<ItemStyle> = MutableLiveData(ItemStyle.DEFAULT)
 
     fun createNewGroup(groupName: String?) {
@@ -115,8 +118,7 @@ class PhotoGroupViewModel : ViewModel() {
             dataLoadCompleted.value = false
             group?.let {
                 RoomDBM.get().getGroupWithData(it.groupId)?.let { result ->
-                    images.value =
-                        result.mediaData.sortedByDescending { data -> data.lastedViewTime }
+                    images.value = ArrayList(result.mediaData.sortedByDescending { data -> data.lastedViewTime })
                     //如果group.imageNum不符合，就更新一下
                     if (group.imageNum != result.mediaData.size) {
                         group.imageNum = result.mediaData.size

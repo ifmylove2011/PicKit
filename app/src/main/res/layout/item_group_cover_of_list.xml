@@ -14,34 +14,30 @@
             type="com.xter.pickit.ui.group.PhotoGroupViewModel" />
     </data>
 
-    <com.xter.pickit.ui.widget.SquareRelativeLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="2dp">
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/iv_group_cover"
+        <com.xter.pickit.ui.widget.SquareRelativeLayout
+            android:id="@+id/rl_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible"
-            android:contentDescription="@string/img_desc_cover" />
+            android:padding="2dp">
 
-        <com.xter.pickit.ui.widget.ImageContainer
-            android:id="@+id/gic_group_cover"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            app:mode="grid"
-            app:stack_span="20dp"
-            app:column="2"
-            app:padding="1dp"
-            app:row="2" />
+            <ImageView
+                android:id="@+id/iv_group_cover"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/img_desc_cover"
+                android:visibility="visible" />
+        </com.xter.pickit.ui.widget.SquareRelativeLayout>
 
         <TextView
             android:id="@+id/tv_group_count"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@id/rl_image"
             android:text="@{String.valueOf(group.imageNum)}"
             android:textColor="@color/purple" />
 
@@ -50,17 +46,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/tv_group_count"
+            android:layout_toEndOf="@id/rl_image"
             android:ellipsize="end"
             android:singleLine="true"
             android:text="@{group.name}"
             android:textColor="@color/purple" />
+    </RelativeLayout>
 
-        <CheckBox
-            android:id="@+id/cb_selected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:visibility="gone" />
-    </com.xter.pickit.ui.widget.SquareRelativeLayout>
 
 </layout>

@@ -9,7 +9,7 @@ import android.os.Build
  */
 object PlatformUtil{
     /**
-     * 判断是否是Android Q版本
+     * 判断是否是Android Q版本，即Android10.0及以上
      *
      * @return
      */
@@ -18,7 +18,7 @@ object PlatformUtil{
     }
 
     /**
-     * 判断是否是Android R版本
+     * 判断是否是Android R版本，即Android11.0及以上
      *
      * @return
      */

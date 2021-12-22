@@ -43,4 +43,8 @@ class ExampleUnitTest {
     fun recVargs(vararg data:CharSequence){
         println(data.contentToString())
     }
+
+    @Test
+    fun test111(){
+    }
 }

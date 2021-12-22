@@ -43,6 +43,19 @@ class PhotoAlbumViewModel : ViewModel() {
         }
     }
 
+    /**
+     * 记录网格布局的行列值
+     */
+    val gridSpanPair: MutableLiveData<Pair<Int, Int>> = MutableLiveData<Pair<Int, Int>>(Pair(2, 2))
+
+    /**
+     * 记录层叠布局下的数量值
+     */
+    val stackNum: MutableLiveData<Int> = MutableLiveData<Int>(3)
+    /**
+     * 目录所用的ItemStyle
+     */
+    val groupStyle: MutableLiveData<ItemStyle> = MutableLiveData(ItemStyle.DEFAULT)
 
     fun commitData(data: List<LocalMedia>) {
         if (pickMode.value!!) {
@@ -64,7 +77,7 @@ class PhotoAlbumViewModel : ViewModel() {
     fun loadMediaFolder(context: Context) {
         viewModelScope.launch {
             folderLoadCompleted.value = false
-            LocalMediaLoader.INSTANCE.loadImageFolders(context,
+            LocalMediaLoader.INSTANCE.loadImageFoldersWithCover(context,
                 object : IQueryResultListener<LocalMediaFolder> {
                     override fun onCompleted(data: MutableList<LocalMediaFolder>) {
                         viewModelScope.launch {

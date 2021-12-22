@@ -37,9 +37,11 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
     }
 
     fun setItemStyle(style: ItemStyle) {
-        mStyle = style
-        L.d("style=${style}")
-        VM.groupStyle.value = style
+        if (mStyle != style) {
+            mStyle = style
+            L.d("style=${style}")
+            VM.groupStyle.value = style
+        }
     }
 
     fun getSelectGroups(): List<LocalMediaGroup> {
@@ -51,8 +53,33 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
         return selectedGroups
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return mStyle.ordinal
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupViewHolder {
-        return GroupViewHolder.from(parent)
+        L.i("viewType = $viewType")
+        return GroupViewHolder.from(parent).apply {
+            this.binding.apply {
+                VM.groupStyle.value?.also { style ->
+                    L.i("style=$style")
+                    if (style == ItemStyle.GRID) {
+                        this.gicGroupCover.setMode(MODE_GRID)
+                        VM.gridSpanPair.value?.let { pair ->
+                            this.gicGroupCover.setRow(pair.first)
+                            this.gicGroupCover.setColumn(pair.second)
+                        }
+                        this.gicGroupCover.invalidate()
+                    } else if (style == ItemStyle.STACK) {
+                        this.gicGroupCover.setMode(MODE_STACK)
+                        VM.stackNum.value?.let { stackNum ->
+                            this.gicGroupCover.setStackNum(stackNum)
+                        }
+                        this.gicGroupCover.invalidate()
+                    }
+                }
+            }
+        }
     }
 
     override fun onBindViewHolder(groupFolder: GroupViewHolder, position: Int) {
@@ -94,10 +121,11 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
                 }
             }
 
-            if (mStyle == ItemStyle.GRID || mStyle == ItemStyle.STACK) {
+            if (mStyle == ItemStyle.GRID||mStyle == ItemStyle.STACK) {
                 groupFolder.binding.gicGroupCover.visibility = View.VISIBLE
                 groupFolder.binding.ivGroupCover.visibility = View.GONE
                 val images = groupFolder.binding.gicGroupCover.getImageViews()
+//                L.d("images = $images")
                 group.coverData?.let { covers ->
                     val maxSize = covers.size
                     for ((index, iv) in images.withIndex()) {
@@ -140,20 +168,6 @@ class GroupViewHolder private constructor(val binding: ItemGroupCoverBinding) :
         binding.apply {
             this.photoGroupVM = vm
             this.group = item
-            vm.groupStyle.value?.also { style ->
-                if (style == ItemStyle.GRID) {
-                    vm.gridSpanPair.value?.let { pair ->
-                        this.gicGroupCover.setRow(pair.first)
-                        this.gicGroupCover.setColumn(pair.second)
-                    }
-                    this.gicGroupCover.setMode(MODE_GRID)
-                } else if (style == ItemStyle.STACK) {
-                    vm.stackNum.value?.let { stackNum ->
-                        this.gicGroupCover.setStackNum(stackNum)
-                    }
-                    this.gicGroupCover.setMode(MODE_STACK)
-                }
-            }
             this.executePendingBindings()
         }
     }

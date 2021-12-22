@@ -12,6 +12,8 @@ import com.xter.pickit.databinding.ItemFolerCoverBinding
 import com.xter.pickit.entity.LocalMediaFolder
 import com.xter.pickit.ext.GlideApp
 import com.xter.pickit.kit.L
+import com.xter.pickit.ui.widget.MODE_GRID
+import com.xter.pickit.ui.widget.MODE_STACK
 
 /**
  * @Author XTER
@@ -30,13 +32,35 @@ class PhotoAlbumAdapter(private val VM: PhotoAlbumViewModel) :
     }
 
     fun setItemStyle(style: ItemStyle) {
-        mStyle = style
-        L.d("style=${style.toString()}")
-        notifyDataSetChanged()
+        if (mStyle != style) {
+            mStyle = style
+            L.d("style=${style}")
+            VM.groupStyle.value = style
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FolderViewHolder {
-        return FolderViewHolder.from(parent)
+        return FolderViewHolder.from(parent).apply {
+            this.binding.apply {
+                VM.groupStyle.value?.also { style ->
+//                    L.i("style=$style")
+                    if (style == ItemStyle.GRID) {
+                        this.gicFolderCover.setMode(MODE_GRID)
+                        VM.gridSpanPair.value?.let { pair ->
+                            this.gicFolderCover.setRow(pair.first)
+                            this.gicFolderCover.setColumn(pair.second)
+                        }
+                        this.gicFolderCover.invalidate()
+                    } else if (style == ItemStyle.STACK) {
+                        this.gicFolderCover.setMode(MODE_STACK)
+                        VM.stackNum.value?.let { stackNum ->
+                            this.gicFolderCover.setStackNum(stackNum)
+                        }
+                        this.gicFolderCover.invalidate()
+                    }
+                }
+            }
+        }
     }
 
     override fun onBindViewHolder(holderFolder: FolderViewHolder, position: Int) {
@@ -48,23 +72,30 @@ class PhotoAlbumAdapter(private val VM: PhotoAlbumViewModel) :
                     onFolderClickListener.onItemClick(holderFolder, holderFolder.adapterPosition)
                 }
                 view.setOnLongClickListener {
-                    onFolderClickListener.onItemLongClick(holderFolder, holderFolder.adapterPosition)
+                    onFolderClickListener.onItemLongClick(
+                        holderFolder,
+                        holderFolder.adapterPosition
+                    )
                     true
                 }
             }
 
-            if (mStyle == ItemStyle.GRID) {
+            if (mStyle == ItemStyle.GRID || mStyle == ItemStyle.STACK) {
                 holderFolder.binding.gicFolderCover.visibility = View.VISIBLE
                 holderFolder.binding.ivFolderCover.visibility = View.GONE
                 val images = holderFolder.binding.gicFolderCover.getImageViews()
-                for (iv in images) {
-                    GlideApp.with(itemView)
-                        .load(folder.firstImagePath)
-                        .transition(withCrossFade())
-                        .centerCrop()
-                        .placeholder(R.drawable.image_placeholder)
-                        .error(R.mipmap.ic_error)
-                        .into(iv)
+//                L.d("images = $images")
+                folder.data?.let { covers ->
+                    val maxSize = covers.size
+                    for ((index, iv) in images.withIndex()) {
+                        GlideApp.with(itemView)
+                            .load(if (index < maxSize) covers[index].path else null)
+                            .transition(withCrossFade())
+                            .centerCrop()
+                            .placeholder(R.drawable.image_placeholder)
+                            .error(R.mipmap.ic_error)
+                            .into(iv)
+                    }
                 }
             } else if (mStyle == ItemStyle.DEFAULT) {
                 holderFolder.binding.gicFolderCover.visibility = View.GONE

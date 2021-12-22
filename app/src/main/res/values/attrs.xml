@@ -23,6 +23,7 @@
         <attr name="row" format="integer" />
         <attr name="column" format="integer" />
         <attr name="stack_num" format="integer" />
+        <attr name="stack_span" format="dimension" />
         <attr name="padding" format="dimension"/>
     </declare-styleable>
 </resources>

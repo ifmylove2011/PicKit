@@ -45,6 +45,7 @@ class LocalMediaLoader {
         MediaStore.Files.FileColumns._ID,
         COLUMN_BUCKET_ID,
         COLUMN_BUCKET_DISPLAY_NAME,
+        MediaStore.MediaColumns.DISPLAY_NAME,
         MediaStore.MediaColumns.MIME_TYPE,
         MediaStore.MediaColumns.DATE_MODIFIED
     )
@@ -54,9 +55,20 @@ class LocalMediaLoader {
         MediaStore.MediaColumns.DATA,
         COLUMN_BUCKET_ID,
         COLUMN_BUCKET_DISPLAY_NAME,
+        MediaStore.MediaColumns.DISPLAY_NAME,
         MediaStore.MediaColumns.MIME_TYPE,
         MediaStore.MediaColumns.DATE_MODIFIED,
-        "COUNT(*) AS " + COLUMN_COUNT
+        "COUNT(*) AS $COLUMN_COUNT"
+    )
+
+    private val PROJECTION_BUCKET_1 = arrayOf(
+        MediaStore.Files.FileColumns._ID,
+        MediaStore.MediaColumns.DATA,
+        COLUMN_BUCKET_ID,
+        COLUMN_BUCKET_DISPLAY_NAME,
+        MediaStore.MediaColumns.DISPLAY_NAME,
+        MediaStore.MediaColumns.MIME_TYPE,
+        MediaStore.MediaColumns.DATE_MODIFIED,
     )
 
     private val PROJECTION_PAGE = arrayOf(
@@ -106,10 +118,30 @@ class LocalMediaLoader {
         }
     }
 
+    private fun getSelectionArgsForImage1(
+        queryMimeTypeOptions: String?
+    ): String? {
+        val stringBuilder = StringBuilder()
+        return if (PlatformUtil.isQ()) {
+            stringBuilder.append(MediaStore.Files.FileColumns.MEDIA_TYPE).append("=?")
+                .append(queryMimeTypeOptions).toString()
+        } else {
+            stringBuilder.append("(").append(MediaStore.Files.FileColumns.MEDIA_TYPE).append("=?")
+                .append(queryMimeTypeOptions).append(")")
+                .toString()
+        }
+    }
+
     private fun getSelectionForFolder(): String? {
 //        val fileSizeCondition = getFileSizeCondition()
         val mimeCondition = getMimeCondition()
         return getSelectionArgsForImage(mimeCondition)
+    }
+
+    private fun getSelectionForFolder1(): String? {
+//        val fileSizeCondition = getFileSizeCondition()
+        val mimeCondition = getMimeCondition()
+        return getSelectionArgsForImage1(mimeCondition)
     }
 
     private fun getPageSelection(bucketId: Long): String {
@@ -269,6 +301,126 @@ class LocalMediaLoader {
     }
 
     /**
+     * "SELECT _id, _data, bucket_id, bucket_display_name, _display_name, mime_type, date_modified FROM files WHERE ((media_type=? OR mime_type='image')) ORDER BY date_modified DESC"
+     */
+    suspend fun loadImageFoldersWithCover(
+        context: Context,
+        listener: IQueryResultListener<LocalMediaFolder>
+    ) = withContext(Dispatchers.IO) {
+        val selection = getSelectionForFolder1()
+        L.i("selection is $selection")
+        context.contentResolver?.query(
+            QUERY_URI,
+            if (PlatformUtil.isQ()) PROJECTION_BUCKET_29 else PROJECTION_BUCKET_1,
+            selection,
+            arrayOf("" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE),
+            ORDER_BY
+        )?.let { cursor ->
+            val count: Int = cursor.count
+            L.i("查询结果 数量 count=$count")
+            var totalCount = 0
+            val mediaFolders: MutableList<LocalMediaFolder> = ArrayList<LocalMediaFolder>()
+            if (count > 0) {
+                //高于Android10只能遍历所有来统计各目录数量
+                val folderMap: MutableMap<Long, Long> = HashMap()
+                while (cursor.moveToNext()) {
+                    val bucketId: Long =
+                        cursor.getLong(cursor.getColumnIndex(COLUMN_BUCKET_ID))
+                    var newCount = folderMap[bucketId]
+                    if (newCount == null) {
+                        newCount = 1L
+                    } else {
+                        newCount++
+                    }
+                    folderMap[bucketId] = newCount
+                }
+                L.d("map=$folderMap")
+                val folderDataMap: MutableMap<Long, ArrayList<LocalMedia>> = HashMap(4)
+                if (cursor.moveToFirst()) {
+                    do {
+                        val bucketId: Long =
+                            cursor.getLong(cursor.getColumnIndex(COLUMN_BUCKET_ID))
+
+                        val bucketDisplayName: String? = cursor.getString(
+                            cursor.getColumnIndex(COLUMN_BUCKET_DISPLAY_NAME)
+                        )
+                        val mimeType: String? =
+                            cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
+                        val size = folderMap[bucketId]!!
+                        val id: Long =
+                            cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns._ID))
+                        val name: String? =
+                            cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME))
+
+                        val url = if (PlatformUtil.isQ()) {
+                            MimeUtil.getRealPathUri(
+                                id,
+                                mimeType
+                            )
+                        } else {
+                            cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA))
+                        }
+
+                        val notedData = folderDataMap.get(bucketId)
+                        if (notedData == null) {
+                            val mediaFolder = LocalMediaFolder(
+                                bucketId, bucketDisplayName, url, mimeType, size.toInt()
+                            )
+                            mediaFolders.add(mediaFolder)
+                            folderDataMap[bucketId] = arrayListOf(
+                                LocalMedia(
+                                    id,
+                                    bucketId,
+                                    name,
+                                    bucketDisplayName,
+                                    url,
+                                    url,
+                                    0,
+                                    mimeType,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0
+                                )
+                            )
+                            totalCount += size.toInt()
+                        } else if (notedData.size < 4) {
+                            notedData.add(
+                                LocalMedia(
+                                    id,
+                                    bucketId,
+                                    name,
+                                    bucketDisplayName,
+                                    url,
+                                    url,
+                                    0,
+                                    mimeType,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    0
+                                )
+                            )
+                            folderDataMap[bucketId] = notedData
+                        } else {
+                            continue
+                        }
+
+                    } while (cursor.moveToNext())
+                }
+                for(m in mediaFolders){
+                    m.data = folderDataMap[m.bucketId]
+                }
+            }
+            L.i("total count=$totalCount")
+            listener.onCompleted(mediaFolders)
+            cursor.close()
+        }
+    }
+
+    /**
      * 根据目录查询图片信息
      * @param context Context
      * @param bucketId 目录ID
@@ -290,8 +442,8 @@ class LocalMediaLoader {
             val queryArgs: Bundle = createQueryArgsBundle(
                 pageSelection,
                 pageSelectionArgs,
-                pageMaxSize,
-                pageMaxSize
+                size,
+                0
             )
             cursor = context.contentResolver.query(QUERY_URI, PROJECTION_PAGE, queryArgs, null)
         } else {
