@@ -8,11 +8,13 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.xter.pickit.R
 import com.xter.pickit.databinding.FragmentPhotoAlbumBinding
 import com.xter.pickit.db.SPM
 import com.xter.pickit.ext.*
 import com.xter.pickit.kit.L
+import com.xter.pickit.ui.widget.QuickItemDecoration
 import pub.devrel.easypermissions.EasyPermissions
 
 /**
@@ -64,7 +66,7 @@ class PhotoAlbumFragment : Fragment() {
             }
             photoFolderAdapter.setItemClickListener(object : OnFolderClickListener {
                 override fun onItemClick(holderFolder: FolderViewHolder, position: Int) {
-                    val folder = holderFolder.binding.folder
+                    val folder = holderFolder.getData()
                     L.d(folder.toString())
                     val bundle = Bundle()
                     bundle.putParcelable(KEY_FOLDER, folder)
@@ -79,7 +81,7 @@ class PhotoAlbumFragment : Fragment() {
             })
             //布局参数
             checkGroupStyle()
-            adapter = photoFolderAdapter
+//            adapter = photoFolderAdapter
         }
         //首次得拿到权限
         if (!EasyPermissions.hasPermissions(
@@ -128,18 +130,33 @@ class PhotoAlbumFragment : Fragment() {
         })
         //布局的改变
         photoVM.groupStyle.observe(viewLifecycleOwner, { style ->
-            photoFolderAdapter.notifyDataSetChanged()
+//            photoFolderAdapter.notifyDataSetChanged()
+            photoBinding.rvAblum.apply {
+                layoutManager = if (style == ItemStyle.LIST) {
+                    addItemDecoration(
+                        QuickItemDecoration(
+                            requireContext(),
+                            LinearLayoutManager.VERTICAL
+                        )
+                    )
+                    LinearLayoutManager(this.context)
+                } else {
+                    GridLayoutManager(this.context, 2)
+                }
+                adapter = photoFolderAdapter
+            }
         })
     }
 
     fun checkGroupStyle() {
+        L.i("check style")
         val style = SPM.getStr(this.context, CONFIG, KEY_FOLDER, ItemStyle.DEFAULT.name)
         if (style == ItemStyle.GRID.name) {
-            val row = SPM.getInt(this.context, CONFIG, GRID_ROW, 2)
-            val column = SPM.getInt(this.context, CONFIG, GRID_COLUMN, 2)
+            val row = SPM.getStr(this.context, CONFIG, GRID_ROW, "2").toInt()
+            val column = SPM.getStr(this.context, CONFIG, GRID_COLUMN, "2").toInt()
             photoVM.gridSpanPair.value = Pair(row, column)
         } else if (style == ItemStyle.STACK.name) {
-            photoVM.stackNum.value = SPM.getInt(this.context, CONFIG, STACK_NUM, 3)
+            photoVM.stackNum.value = SPM.getStr(this.context, CONFIG, STACK_NUM, "3").toInt()
         }
         photoFolderAdapter.setItemStyle(ItemStyle.valueOf(style))
     }

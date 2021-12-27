@@ -55,7 +55,6 @@
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="com.xter.pickit.ui.slideshow.SlideshowFragment"
-        android:label="@string/action_settings"
-        tools:layout="@layout/fragment_slideshow" />
+        android:name="com.xter.pickit.ui.setting.SettingsFragment"
+        android:label="@string/action_settings" />
 </navigation>

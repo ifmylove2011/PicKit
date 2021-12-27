@@ -68,12 +68,14 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
                         VM.gridSpanPair.value?.let { pair ->
                             this.gicGroupCover.setRow(pair.first)
                             this.gicGroupCover.setColumn(pair.second)
+                            this.gicGroupCover.resetViews(pair.first * pair.second)
                         }
                         this.gicGroupCover.invalidate()
                     } else if (style == ItemStyle.STACK) {
                         this.gicGroupCover.setMode(MODE_STACK)
                         VM.stackNum.value?.let { stackNum ->
                             this.gicGroupCover.setStackNum(stackNum)
+                            this.gicGroupCover.resetViews(stackNum)
                         }
                         this.gicGroupCover.invalidate()
                     }
@@ -121,11 +123,12 @@ class PhotoGroupAdapter(private val VM: PhotoGroupViewModel) :
                 }
             }
 
+            //第一次进来时，因为目录加载过的图片有缓存，且为正方形，所以显示会不同
             if (mStyle == ItemStyle.GRID||mStyle == ItemStyle.STACK) {
                 groupFolder.binding.gicGroupCover.visibility = View.VISIBLE
                 groupFolder.binding.ivGroupCover.visibility = View.GONE
                 val images = groupFolder.binding.gicGroupCover.getImageViews()
-//                L.d("images = $images")
+                L.d("images = $images")
                 group.coverData?.let { covers ->
                     val maxSize = covers.size
                     for ((index, iv) in images.withIndex()) {

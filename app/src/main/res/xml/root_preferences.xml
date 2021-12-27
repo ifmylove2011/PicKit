@@ -1,0 +1,73 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/appearence">
+
+        <EditTextPreference
+            android:defaultValue="14"
+            app:key="font_size"
+            app:title="@string/pre_font_size"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/menu_brower">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:summary="@string/pre_include_video_hint"
+            app:key="include_video"
+            app:title="@string/pre_include_video" />
+
+        <EditTextPreference
+            app:defaultValue="5kb"
+            app:key="min_file_size"
+            app:title="@string/pre_filter_min_size"
+            android:summary="kb"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/pre_view">
+
+        <ListPreference
+            app:defaultValue="DEFAULT"
+            app:entries="@array/style_keys"
+            app:entryValues="@array/style_values"
+            app:key="FOLDER"
+            app:title="@string/pre_dir_style"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="GRID"
+            app:entries="@array/style_keys"
+            app:entryValues="@array/style_values"
+            app:key="GROUP"
+            app:title="@string/pre_group_style"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="2"
+            app:entries="@array/grid_values"
+            app:entryValues="@array/grid_values"
+            app:key="grid_column"
+            app:title="@string/action_grid_columns"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="2"
+            app:entries="@array/grid_values"
+            app:entryValues="@array/grid_values"
+            app:key="grid_row"
+            app:title="@string/action_grid_rows"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="3"
+            app:entries="@array/stack_values"
+            app:entryValues="@array/stack_values"
+            app:key="stack_num"
+            app:title="@string/pre_stack_num"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

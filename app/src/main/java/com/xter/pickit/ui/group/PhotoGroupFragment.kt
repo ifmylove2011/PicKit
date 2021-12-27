@@ -167,11 +167,11 @@ class PhotoGroupFragment : Fragment() {
     fun checkGroupStyle() {
         val style = SPM.getStr(this.context, CONFIG, KEY_GROUP, ItemStyle.DEFAULT.name)
         if (style == ItemStyle.GRID.name) {
-            val row = SPM.getInt(this.context, CONFIG, GRID_ROW, 2)
-            val column = SPM.getInt(this.context, CONFIG, GRID_COLUMN, 2)
+            val row = SPM.getStr(this.context, CONFIG, GRID_ROW, "2").toInt()
+            val column = SPM.getStr(this.context, CONFIG, GRID_COLUMN, "2").toInt()
             photoGroupVM.gridSpanPair.value = Pair(row, column)
         } else if (style == ItemStyle.STACK.name) {
-            photoGroupVM.stackNum.value = SPM.getInt(this.context, CONFIG, STACK_NUM, 3)
+            photoGroupVM.stackNum.value = SPM.getStr(this.context, CONFIG, STACK_NUM, "3").toInt()
         }
         photoGroupAdapter.setItemStyle(ItemStyle.valueOf(style))
     }

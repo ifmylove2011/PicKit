@@ -85,30 +85,34 @@ class ImageContainer : ViewGroup {
             //确定每个视图的宽高
             val unitWidth = (r - l - (mColumn - 1) * mPadding) / mColumn
             val unitHeight = (b - t - (mRow - 1) * mPadding) / mRow
+//            L.i("mColumn=$mColumn,mRow=$mRow,count=$count")
 //            L.i("unitWidth=$unitWidth,unitHeight=$unitHeight,count=$count")
             //寻位
             for (i in 0 until count) {
-                val child = getChildAt(i)
-                //当前子视图所在行列
-                val currentRow = i / mColumn
-                val currentColumn = i % mRow
-                //计算位置
-                val left = currentColumn * mPadding + currentColumn * unitWidth
-                val top = currentRow * mPadding + currentRow * unitHeight
+                getChildAt(i)?.apply {
+                    //当前子视图所在行列
+                    val currentRow = i / mColumn
+                    val currentColumn = i % mColumn
+                    //计算位置
+                    val left = currentColumn * mPadding + currentColumn * unitWidth
+                    val top = currentRow * mPadding + currentRow * unitHeight
 //            L.i("index=$i")
 //            L.i("currentRow=$currentRow,currentColumn=$currentColumn")
-//            L.i("left=$left,top=$top")
-                child.layout(left, top, left + unitWidth, top + unitHeight)
+            L.i("left=$left,top=$top")
+                    layout(left, top, left + unitWidth, top + unitHeight)
+                }
             }
         } else if (mode == MODE_STACK) {
             val unitWidth = (r - l - mStackSpan * (mStackNum - 1))
 //            L.i("width=$unitWidth,count=$count")
             for (i in 0 until count) {
-                val child = getChildAt(i)
-                val left = mStackSpan * i
-                val top = mStackSpan * (count - i - 1)
-                child.z = top.toFloat()
-                child.layout(left, top, left + unitWidth, top + unitWidth)
+                getChildAt(i)?.apply {
+                    val left = mStackSpan * i
+                    val top = mStackSpan * (count - i - 1)
+                    //先出现的视图在上层
+                    z = top.toFloat()
+                    layout(left, top, left + unitWidth, top + unitWidth)
+                }
             }
         }
     }
@@ -167,6 +171,22 @@ class ImageContainer : ViewGroup {
 
     fun getImageViews(): List<ImageView> {
         return mImageViews
+    }
+
+    fun resetViews(newCount: Int) {
+        val oldCount = mImageViews.size
+        if (oldCount < newCount) {
+            for (i in oldCount until newCount) {
+                val childImageView = ImageView(context)
+                addView(childImageView)
+                mImageViews.add(childImageView)
+            }
+        } else if (oldCount > newCount) {
+            removeViews(newCount, oldCount - newCount)
+            for (i in oldCount - 1 downTo newCount) {
+                mImageViews.removeLast()
+            }
+        }
     }
 }
 

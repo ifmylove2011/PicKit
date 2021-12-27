@@ -46,5 +46,11 @@ class ExampleUnitTest {
 
     @Test
     fun test111(){
+        for(i in 4 until 6){
+            print(i)
+        }
+        for(i in 4-1 downTo  2){
+            print(i)
+        }
     }
 }

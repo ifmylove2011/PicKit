@@ -23,16 +23,16 @@
             android:id="@+id/iv_folder_cover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible"
-            android:contentDescription="@string/img_desc_cover" />
+            android:contentDescription="@string/img_desc_cover"
+            android:visibility="visible" />
 
         <com.xter.pickit.ui.widget.ImageContainer
             android:id="@+id/gic_folder_cover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
-            app:mode="grid"
             app:column="2"
+            app:mode="grid"
             app:padding="1dp"
             app:row="2" />
 
@@ -42,7 +42,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:text="@{String.valueOf(folder.imageNum)}"
-            android:textColor="@color/purple" />
+            android:textColor="@color/purple"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/tv_folder_name"
@@ -52,6 +53,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:text="@{folder.name}"
-            android:textColor="@color/purple" />
+            android:textColor="@color/purple"
+            android:textSize="14sp" />
     </com.xter.pickit.ui.widget.SquareRelativeLayout>
 </layout>
