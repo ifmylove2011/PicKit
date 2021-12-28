@@ -133,7 +133,7 @@ class PhotoContentFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
-        if (photoVM.pickMode.value == true) {
+        if (photoVM.pickMode.value != PICK_NONE) {
             inflater.inflate(R.menu.album_skim_pick, menu)
         } else {
             inflater.inflate(R.menu.album_skim, menu)

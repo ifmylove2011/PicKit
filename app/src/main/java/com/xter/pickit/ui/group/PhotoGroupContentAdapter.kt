@@ -64,9 +64,14 @@ class PhotoGroupContentAdapter(private val VM: PhotoGroupViewModel) :
 
             //先放监听，以确定数据选中状态与数量
             binding.cbSelected.setOnCheckedChangeListener { _, isChecked ->
+                if (data.isSelected xor isChecked) {
+                    VM.selectNum.value =
+                        if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
+                }
                 data.isSelected = isChecked
-                VM.selectNum.value =
-                    if (isChecked) VM.selectNum.value?.plus(1) else VM.selectNum.value?.minus(1)
+                if (isChecked) {
+                    data.lastedViewTime = System.currentTimeMillis() / 1000
+                }
             }
             if (VM.choiceModeOpenForContent.value!!) {
                 binding.cbSelected.visibility = View.VISIBLE

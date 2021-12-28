@@ -180,7 +180,7 @@ class PhotoGroupContentFragment : Fragment() {
 
     fun toPickImages() {
         val bundle = Bundle()
-        bundle.putBoolean(KEY_PICK, true)
+        bundle.putInt(KEY_PICK, PICK_INTERNAL)
         view?.findNavController()?.navigate(R.id.action_nav_group_content_to_nav_ablum, bundle)
     }
 
@@ -211,5 +211,6 @@ class PhotoGroupContentFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         photoGroupVM.pickingGroupData.value?.clear()
+        photoGroupVM.choiceModeOpenForContent.value = false
     }
 }

@@ -3,9 +3,11 @@ package com.xter.pickit.media
 import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.entity.LocalMediaFolder
 import com.xter.pickit.kit.L
@@ -36,15 +38,16 @@ class LocalMediaLoader {
     private val COLUMN_BUCKET_ID = "bucket_id"
     private val COLUMN_BUCKET_DISPLAY_NAME = "bucket_display_name"
 
-    private val fileSizeMax = 20 * 1024
-    private val fileSizeMin = 2
+    private val fileSizeMax = 20 * 1024 * 1024
+    private val fileSizeMin = 5 * 1024
     private val pageMaxSize = 60
     private var mPage = 1
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private val PROJECTION_BUCKET_29 = arrayOf(
         MediaStore.Files.FileColumns._ID,
-        COLUMN_BUCKET_ID,
-        COLUMN_BUCKET_DISPLAY_NAME,
+        MediaStore.MediaColumns.BUCKET_ID,
+        MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
         MediaStore.MediaColumns.DISPLAY_NAME,
         MediaStore.MediaColumns.MIME_TYPE,
         MediaStore.MediaColumns.DATE_MODIFIED
@@ -79,7 +82,7 @@ class LocalMediaLoader {
         MediaStore.MediaColumns.HEIGHT,
         MediaStore.MediaColumns.DURATION,
         MediaStore.MediaColumns.SIZE,
-        MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
+        COLUMN_BUCKET_DISPLAY_NAME,
         MediaStore.MediaColumns.DISPLAY_NAME,
         COLUMN_BUCKET_ID,
         MediaStore.MediaColumns.DATE_ADDED,
@@ -119,7 +122,8 @@ class LocalMediaLoader {
     }
 
     private fun getSelectionArgsForImage1(
-        queryMimeTypeOptions: String?
+        queryMimeTypeOptions: String?,
+        fileCondition: String?
     ): String? {
         val stringBuilder = StringBuilder()
         return if (PlatformUtil.isQ()) {
@@ -128,6 +132,7 @@ class LocalMediaLoader {
         } else {
             stringBuilder.append("(").append(MediaStore.Files.FileColumns.MEDIA_TYPE).append("=?")
                 .append(queryMimeTypeOptions).append(")")
+                .append(" AND ").append(fileCondition)
                 .toString()
         }
     }
@@ -139,14 +144,15 @@ class LocalMediaLoader {
     }
 
     private fun getSelectionForFolder1(): String? {
-//        val fileSizeCondition = getFileSizeCondition()
+        val fileSizeCondition = getFileSizeCondition()
         val mimeCondition = getMimeCondition()
-        return getSelectionArgsForImage1(mimeCondition)
+        return getSelectionArgsForImage1(mimeCondition, fileSizeCondition)
     }
 
     private fun getPageSelection(bucketId: Long): String {
         val mimeCondition = getMimeCondition()
-        return getPageSelectionArgsForImage(bucketId, mimeCondition)
+        val fileSizeCondition = getFileSizeCondition()
+        return getPageSelectionArgsForImage(bucketId, mimeCondition, fileSizeCondition)
     }
 
     private fun getSelectionArgsForPageSingleMediaType(
@@ -169,16 +175,18 @@ class LocalMediaLoader {
 
     private fun getPageSelectionArgsForImage(
         bucketId: Long,
-        queryMimeCondition: String
+        queryMimeCondition: String,
+        fileSizeCondition: String
     ): String {
         val stringBuilder = StringBuilder()
         stringBuilder.append("(").append(MediaStore.Files.FileColumns.MEDIA_TYPE).append("=?")
         return if (bucketId == -1L) {
-            stringBuilder.append(queryMimeCondition).append(")").toString()
+            stringBuilder.append(queryMimeCondition).append(") AND ").append(fileSizeCondition)
+                .toString()
         } else {
             stringBuilder.append(queryMimeCondition).append(") AND ")
                 .append(COLUMN_BUCKET_ID)
-                .append("=? ").toString()
+                .append("=? AND ").append(fileSizeCondition).toString()
         }
     }
 
@@ -410,7 +418,7 @@ class LocalMediaLoader {
 
                     } while (cursor.moveToNext())
                 }
-                for(m in mediaFolders){
+                for (m in mediaFolders) {
                     m.data = folderDataMap[m.bucketId]
                 }
             }
@@ -481,10 +489,14 @@ class LocalMediaLoader {
                     val id = cursor.getLong(idColumn)
                     val mimeType = cursor.getString(mimeTypeColumn)
                     val absolutePath = cursor.getString(dataColumn)
-                    val url = if (PlatformUtil.isQ()) MimeUtil.getRealPathUri(
+//                    val url = if (PlatformUtil.isQ()) MimeUtil.getRealPathUri(
+//                        id,
+//                        mimeType
+//                    ) else absolutePath
+                    val url = MimeUtil.getRealPathUri(
                         id,
                         mimeType
-                    ) else absolutePath
+                    )
                     val width = cursor.getInt(widthColumn)
                     val height = cursor.getInt(heightColumn)
                     val duration = cursor.getLong(durationColumn)
@@ -495,6 +507,7 @@ class LocalMediaLoader {
                     val dateAdded = cursor.getLong(dateAddedColumn)
                     val dateModified = cursor.getLong(dateModifiedColumn)
 
+//                    L.i("uri=$url,abs=$absolutePath")
                     val localMedia = LocalMedia(
                         id,
                         bucketId,

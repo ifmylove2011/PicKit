@@ -21,6 +21,11 @@ const val KEY_PICK = "pick"
 const val KEY_MEDIA_DATA = "mediaData"
 const val KEY_MEDIA_DATA_POS = "mediaDataPos"
 
+const val PICK_NONE = -1
+const val PICK_INTERNAL = 0
+const val PICK_EXTERNAL = 1
+const val PICK_EXTERNAL_MULTIPLE = 2
+
 const val TAG_DETAIL = "detail"
 
 const val CONFIG = "config"

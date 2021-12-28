@@ -14,10 +14,10 @@
     <PreferenceCategory app:title="@string/menu_brower">
 
         <CheckBoxPreference
-            android:defaultValue="false"
-            android:summary="@string/pre_include_video_hint"
-            app:key="include_video"
-            app:title="@string/pre_include_video" />
+            android:defaultValue="true"
+            android:summary="@string/pre_include_gif_hint"
+            app:key="include_gif"
+            app:title="@string/pre_include_gif" />
 
         <EditTextPreference
             app:defaultValue="5kb"

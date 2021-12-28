@@ -98,7 +98,7 @@ class ImageContainer : ViewGroup {
                     val top = currentRow * mPadding + currentRow * unitHeight
 //            L.i("index=$i")
 //            L.i("currentRow=$currentRow,currentColumn=$currentColumn")
-            L.i("left=$left,top=$top")
+//            L.i("left=$left,top=$top")
                     layout(left, top, left + unitWidth, top + unitHeight)
                 }
             }

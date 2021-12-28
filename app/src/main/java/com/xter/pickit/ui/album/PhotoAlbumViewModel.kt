@@ -5,6 +5,8 @@ import androidx.lifecycle.*
 import com.xter.pickit.entity.LocalMedia
 import com.xter.pickit.entity.LocalMediaFolder
 import com.xter.pickit.ext.KEY_GROUP
+import com.xter.pickit.ext.PICK_INTERNAL
+import com.xter.pickit.ext.PICK_NONE
 import com.xter.pickit.ext.ViewModelFactory
 import com.xter.pickit.kit.L
 import com.xter.pickit.media.IQueryResultListener
@@ -27,15 +29,18 @@ class PhotoAlbumViewModel : ViewModel() {
     val folders: MutableLiveData<List<LocalMediaFolder>> = MutableLiveData<List<LocalMediaFolder>>()
     val images: MutableLiveData<List<LocalMedia>> = MutableLiveData<List<LocalMedia>>()
 
+    val pickingGroupData: MutableLiveData<HashSet<LocalMedia>> =
+        MutableLiveData<HashSet<LocalMedia>>(HashSet())
+
     val currentPos: MutableLiveData<Int> = MutableLiveData(0)
     val selectNum: MutableLiveData<Int> = MutableLiveData(0)
 
     val choiceModeOpenForContent = MutableLiveData<Boolean>(false)
 
-    val pickMode: MutableLiveData<Boolean> = MutableLiveData(false)
+    val pickMode: MutableLiveData<Int> = MutableLiveData(PICK_NONE)
 
     val pickingNum: LiveData<Int> = pickMode.switchMap { open ->
-        if (open) {
+        if (open == PICK_INTERNAL) {
             val photoGroupVM = ViewModelFactory.create(KEY_GROUP, PhotoGroupViewModel::class.java)
             MutableLiveData<Int>(photoGroupVM.pickingGroupData.value?.size)
         } else {
@@ -52,23 +57,29 @@ class PhotoAlbumViewModel : ViewModel() {
      * 记录层叠布局下的数量值
      */
     val stackNum: MutableLiveData<Int> = MutableLiveData<Int>(3)
+
     /**
      * 目录所用的ItemStyle
      */
     val groupStyle: MutableLiveData<ItemStyle> = MutableLiveData(ItemStyle.DEFAULT)
 
     fun commitData(data: List<LocalMedia>) {
-        if (pickMode.value!!) {
+        if (pickMode.value == PICK_INTERNAL) {
+            pickingGroupData.value?.addAll(data)
             val photoGroupVM = ViewModelFactory.create(KEY_GROUP, PhotoGroupViewModel::class.java)
             photoGroupVM.pickingGroupData.value?.addAll(data)
         }
     }
 
-    fun pickFinish(){
-        if (pickMode.value!!) {
+    fun pickFinish() {
+        pickMode.value = PICK_NONE
+        choiceModeOpenForContent.value = false
+        pickingGroupData.value?.clear()
+        if (pickMode.value == PICK_INTERNAL) {
             val photoGroupVM = ViewModelFactory.create(KEY_GROUP, PhotoGroupViewModel::class.java)
             photoGroupVM.saveSelectedData()
         }
+
     }
 
     /**

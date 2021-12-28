@@ -41,15 +41,17 @@ class PhotoAlbumFragment : Fragment() {
             this.vm = photoVM
         }
         //因为要改变menu，所以要先于创建菜单前得到
-        arguments?.getBoolean(KEY_PICK).let { pick ->
-            if (pick != null) {
-                //要挑选图片
-                photoVM.pickMode.value = true
-                photoVM.choiceModeOpenForContent.value = true
-            } else {
-                //正常的浏览
-                photoVM.pickMode.value = false
-                photoVM.choiceModeOpenForContent.value = false
+        arguments?.getInt(KEY_PICK)?.let { pick ->
+            when (pick) {
+                PICK_INTERNAL, PICK_EXTERNAL, PICK_EXTERNAL_MULTIPLE -> {
+                    //内部应用要挑选图片
+                    photoVM.pickMode.value = pick
+                    photoVM.choiceModeOpenForContent.value = true
+                }
+                else -> {
+                    photoVM.pickMode.value = PICK_NONE
+                    photoVM.choiceModeOpenForContent.value = false
+                }
             }
         }
         setHasOptionsMenu(true)
@@ -171,7 +173,7 @@ class PhotoAlbumFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
-        if (photoVM.pickMode.value == true) {
+        if (photoVM.pickMode.value != PICK_NONE) {
             inflater.inflate(R.menu.album_pick, menu)
         } else {
             inflater.inflate(R.menu.album, menu)

@@ -78,7 +78,9 @@
 
     <string name="appearence">外观</string>
     <string name="pre_include_video">包含视频文件</string>
+    <string name="pre_include_gif">包含动态图片</string>
     <string name="pre_include_video_hint">是否显示视频文件</string>
+    <string name="pre_include_gif_hint">是否显示动态图片</string>
     <string name="pre_filter_min_size">过滤文件大小</string>
     <string name="pre_font_size">字体大小</string>
     <string name="pre_font_color">字体颜色</string>
