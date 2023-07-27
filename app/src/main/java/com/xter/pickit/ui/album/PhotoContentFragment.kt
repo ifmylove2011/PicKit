@@ -39,7 +39,7 @@ class PhotoContentFragment : Fragment() {
         }
         setHasOptionsMenu(true)
 
-        return photoBinding!!.root
+        return photoBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

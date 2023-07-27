@@ -82,7 +82,7 @@ class PhotoGroupViewModel : ViewModel() {
 
     fun deleteGroups(groups: List<LocalMediaGroup>) {
         viewModelScope.launch {
-            RoomDBM.get().deleteGroups(groups)?.let { rows ->
+            RoomDBM.get().deleteGroups(groups).let { rows ->
                 if (rows > 0) {
                     L.i("删除group $rows")
                     selectGroupNum.value = 0

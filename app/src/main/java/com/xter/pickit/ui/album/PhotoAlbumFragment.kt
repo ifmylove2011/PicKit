@@ -1,6 +1,7 @@
 package com.xter.pickit.ui.album
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
@@ -54,8 +55,10 @@ class PhotoAlbumFragment : Fragment() {
                 }
             }
         }
+        L.d("mode = " + photoVM.pickMode.value)
+
         setHasOptionsMenu(true)
-        return photoBinding!!.root
+        return photoBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -85,10 +88,14 @@ class PhotoAlbumFragment : Fragment() {
             checkGroupStyle()
 //            adapter = photoFolderAdapter
         }
+        var per = Manifest.permission.READ_EXTERNAL_STORAGE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            per = Manifest.permission.READ_MEDIA_IMAGES
+        }
         //首次得拿到权限
         if (!EasyPermissions.hasPermissions(
                 requireContext(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                per
             )
         ) {
             return
@@ -104,6 +111,7 @@ class PhotoAlbumFragment : Fragment() {
             })
         //目录数据几乎是不变的，因此可以用来判断是否已经加载过
         if (photoVM.folders.value == null) {
+            L.i("loading folder......")
             photoVM.loadMediaFolder(requireContext())
         }
         //监听pickMode下的选择总数，浏览情况下并不处理
@@ -165,7 +173,7 @@ class PhotoAlbumFragment : Fragment() {
 
     fun createDetailFragment() {
         val detailFragment = PhotoDetailFragment()
-        fragmentManager?.beginTransaction()?.let { ft ->
+        parentFragmentManager.beginTransaction()?.let { ft ->
             ft.add(detailFragment, TAG_DETAIL)
             ft.commit()
         }
@@ -173,6 +181,7 @@ class PhotoAlbumFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
+        L.d("mode = " + photoVM.pickMode.value)
         if (photoVM.pickMode.value != PICK_NONE) {
             inflater.inflate(R.menu.album_pick, menu)
         } else {

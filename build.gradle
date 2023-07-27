@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = "1.5.10"
+    ext.kotlin_version = "1.6.21"
     repositories {
         google()
         mavenCentral()
@@ -24,4 +24,17 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        Set<File> fileSet = options.bootstrapClasspath.getFiles()
+        List<File> newFileList = new ArrayList<>();
+        //相对位置，根据存放的位置修改路径
+        newFileList.add(new File("./app/libs/framework_1.jar"))
+        newFileList.addAll(fileSet)
+        options.bootstrapClasspath = files(
+                newFileList.toArray()
+        )
+    }
 }

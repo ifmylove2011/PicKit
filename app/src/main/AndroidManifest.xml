@@ -2,16 +2,27 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.xter.pickit">
 
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
+        android:name=".ext.PicApp"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.PicKit">
+        <service
+            android:name=".ext.LastWillService"
+            android:process=":lastwill"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
         <activity
+            android:exported="true"
             android:name=".ui.album.PhotoDetailActivity"
             android:label="@string/img_desc_detail"
             android:theme="@style/Theme.PicKit.NoActionBar" />
@@ -22,6 +33,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.PicKit.NoActionBar">
             <intent-filter>
@@ -30,52 +42,81 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
-                <category android:name="android.intent.category.APP_GALLERY"/>
-                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <category android:name="android.intent.category.APP_GALLERY" />
+                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT"/>
-                <category android:name="android.intent.category.OPENABLE"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="vnd.android.cursor.dir/image"/>
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.OPENABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+                <data android:mimeType="vnd.android.cursor.dir/image" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.PICK"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="vnd.android.cursor.dir/image"/>
+                <action android:name="android.intent.action.PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+                <data android:mimeType="vnd.android.cursor.dir/image" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.android.camera.action.REVIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="vnd.android.cursor.dir/image"/>
-                <data android:mimeType="vnd.android.cursor.dir/video"/>
+                <action android:name="com.android.camera.action.REVIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+                <data android:mimeType="vnd.android.cursor.dir/image" />
+                <data android:mimeType="vnd.android.cursor.dir/video" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.cooliris.media.action.REVIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="vnd.android.cursor.dir/image"/>
-                <data android:mimeType="vnd.android.cursor.dir/video"/>
+                <action android:name="com.cooliris.media.action.REVIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+                <data android:mimeType="vnd.android.cursor.dir/image" />
+                <data android:mimeType="vnd.android.cursor.dir/video" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="open" android:pathPrefix="/" android:scheme="quickpic"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="open"
+                    android:pathPrefix="/"
+                    android:scheme="quickpic" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="com.xter.pickit" android:path="/" android:scheme="open"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="com.xter.pickit"
+                    android:path="/"
+                    android:scheme="open" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider"></meta-data>
+        </provider>
     </application>
 
 </manifest>

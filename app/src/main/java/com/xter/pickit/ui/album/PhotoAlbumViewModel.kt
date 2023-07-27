@@ -72,14 +72,13 @@ class PhotoAlbumViewModel : ViewModel() {
     }
 
     fun pickFinish() {
-        pickMode.value = PICK_NONE
-        choiceModeOpenForContent.value = false
-        pickingGroupData.value?.clear()
         if (pickMode.value == PICK_INTERNAL) {
             val photoGroupVM = ViewModelFactory.create(KEY_GROUP, PhotoGroupViewModel::class.java)
             photoGroupVM.saveSelectedData()
         }
-
+        pickMode.value = PICK_NONE
+        choiceModeOpenForContent.value = false
+        pickingGroupData.value?.clear()
     }
 
     /**

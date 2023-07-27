@@ -39,7 +39,7 @@ class PhotoDetailFragment : Fragment() {
             this.vm = photoVM
         }
         setHasOptionsMenu(true)
-        return detailBinding!!.root
+        return detailBinding.root
     }
 
 //    fun changeToolbar(){

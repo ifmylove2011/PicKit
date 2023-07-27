@@ -73,7 +73,7 @@ class PhotoGroupFragment : Fragment() {
         })
         //选择数量，toolbar显示变化
         photoGroupVM.selectGroupNum.value = 0
-        photoGroupVM.selectGroupNum.observe(viewLifecycleOwner, { selectNum ->
+        photoGroupVM.selectGroupNum.observe(viewLifecycleOwner) { selectNum ->
             (activity as AppCompatActivity).supportActionBar?.let { toolbar ->
                 if (selectNum > 0) {
                     if (toolbar.title.toString().contains("(")) {
@@ -93,7 +93,7 @@ class PhotoGroupFragment : Fragment() {
                     }
                 }
             }
-        })
+        }
         //监听选择视图的显示与隐藏
         photoGroupVM.choiceModeOpenForGroup.observe(viewLifecycleOwner, { open ->
             photoGroupAdapter.notifyDataSetChanged()
